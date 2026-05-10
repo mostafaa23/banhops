@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -52,13 +53,13 @@ class _SignInScreenState extends State<SignInScreen>
     super.dispose();
   }
 
-  String? _validateUsername(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Username is required';
+  String? _validateUsername(String? value, AppLocalizations l10n) {
+    if (value == null || value.trim().isEmpty) return l10n.usernameRequired;
     return null;
   }
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return 'Password is required';
+  String? _validatePassword(String? value, AppLocalizations l10n) {
+    if (value == null || value.isEmpty) return l10n.passwordRequired;
     return null;
   }
 
@@ -70,6 +71,7 @@ class _SignInScreenState extends State<SignInScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: FadeTransition(
@@ -79,7 +81,7 @@ class _SignInScreenState extends State<SignInScreen>
           child: Column(
             children: [
               // ── Wave Header ──────────────────────────────
-              _WaveHeader(),
+              _WaveHeader(title: l10n.signIn),
 
               // ── Form Area ────────────────────────────────
               Expanded(
@@ -96,10 +98,10 @@ class _SignInScreenState extends State<SignInScreen>
                         // Username Field
                         _buildField(
                           controller: _usernameCtrl,
-                          label: 'USERNAME',
-                          hint: 'johndoe123',
+                          label: l10n.username.toUpperCase(),
+                          hint: l10n.usernameHint,
                           keyboardType: TextInputType.text,
-                          validator: _validateUsername,
+                          validator: (v) => _validateUsername(v, l10n),
                         ),
 
                         const SizedBox(height: 16),
@@ -107,10 +109,10 @@ class _SignInScreenState extends State<SignInScreen>
                         // Password Field
                         _buildField(
                           controller: _passwordCtrl,
-                          label: 'PASSWORD',
-                          hint: '············',
+                          label: l10n.password.toUpperCase(),
+                          hint: l10n.passwordHint,
                           obscure: _obscurePassword,
-                          validator: _validatePassword,
+                          validator: (v) => _validatePassword(v, l10n),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -136,9 +138,9 @@ class _SignInScreenState extends State<SignInScreen>
                                 padding: EdgeInsets.zero,
                                 minimumSize: const Size(0, 32),
                               ),
-                              child: const Text(
-                                'Forgot Password?',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.forgotPassword,
+                                style: const TextStyle(
                                   color: Color(0xFF4A90E2),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
@@ -162,9 +164,9 @@ class _SignInScreenState extends State<SignInScreen>
                               ),
                               elevation: 4,
                             ),
-                            child: const Text(
-                              'Sign In',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.signIn,
+                              style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -178,18 +180,19 @@ class _SignInScreenState extends State<SignInScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
-                              "Don't have an account? ",
-                              style: TextStyle(
+                            Text(
+                              l10n.dontHaveAccount,
+                              style: const TextStyle(
                                 color: Colors.black54,
                                 fontSize: 14,
                               ),
                             ),
+                            const SizedBox(width: 4),
                             GestureDetector(
                               onTap: widget.onSignUpTap,
-                              child: const Text(
-                                'Sign Up',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.signUp,
+                                style: const TextStyle(
                                   color: Color(0xFF4A90E2),
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -276,6 +279,9 @@ class _SignInScreenState extends State<SignInScreen>
 
 // ── Wave Header ──────────────────────────────────────────
 class _WaveHeader extends StatelessWidget {
+  final String title;
+  const _WaveHeader({required this.title});
+
   @override
   Widget build(BuildContext context) {
     return ClipPath(
@@ -290,11 +296,11 @@ class _WaveHeader extends StatelessWidget {
             colors: [Color(0xFF5BAEE8), Color(0xFF4A90E2)],
           ),
         ),
-        child: const SafeArea(
+        child: SafeArea(
           child: Center(
             child: Text(
-              'Sign In',
-              style: TextStyle(
+              title,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

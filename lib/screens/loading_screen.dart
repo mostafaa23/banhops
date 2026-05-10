@@ -87,7 +87,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.2),
+                          color: AppColors.primary.withValues(alpha: 0.2),
                           blurRadius: 30,
                           spreadRadius: 2,
                         ),
@@ -170,7 +170,7 @@ class _LoadingScreenState extends State<LoadingScreen>
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.primary.withOpacity(opacity),
+        color: AppColors.primary.withValues(alpha: opacity),
       ),
     );
   }

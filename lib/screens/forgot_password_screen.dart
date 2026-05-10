@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 enum _Step { credentials, verification, newPassword }
@@ -24,7 +25,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _credentialsKey = GlobalKey<FormState>();
   final _passwordKey = GlobalKey<FormState>();
 
-  final _username = TextEditingController();
+  final _phone = TextEditingController();
   final _email = TextEditingController();
   final _newPass = TextEditingController();
   final _confirmPass = TextEditingController();
@@ -38,7 +39,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   void dispose() {
-    _username.dispose();
+    _phone.dispose();
     _email.dispose();
     _newPass.dispose();
     _confirmPass.dispose();
@@ -51,25 +52,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  String _title() {
+  String _title(AppLocalizations l10n) {
     switch (_step) {
       case _Step.credentials:
-        return 'Forgot Password';
+        return l10n.forgotPassword;
       case _Step.verification:
-        return 'Verify Code';
+        return l10n.verifyCode;
       case _Step.newPassword:
-        return 'New Password';
+        return l10n.newPassword;
     }
   }
 
-  String _description() {
+  String _description(AppLocalizations l10n) {
     switch (_step) {
       case _Step.credentials:
-        return 'Enter your username and email to receive a verification code.';
+        return l10n.forgotPasswordStep1Desc;
       case _Step.verification:
-        return 'We sent a 6-digit code to your email. Enter it below.';
+        return l10n.forgotPasswordStep2Desc;
       case _Step.newPassword:
-        return 'Choose a strong new password for your account.';
+        return l10n.forgotPasswordStep3Desc;
     }
   }
 
@@ -83,16 +84,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
   }
 
-  String? _required(String? v, String label) {
-    if (v == null || v.trim().isEmpty) return '$label is required';
+  String? _required(String? v, String message) {
+    if (v == null || v.trim().isEmpty) return message;
     return null;
   }
 
-  String? _validateEmail(String? v) {
-    final base = _required(v, 'Email');
+  String? _validateEmail(String? v, AppLocalizations l10n) {
+    final base = _required(v, l10n.emailRequired);
     if (base != null) return base;
     final r = RegExp(r'^[\w.\-]+@[\w\-]+\.[\w.\-]+$');
-    if (!r.hasMatch(v!.trim())) return 'Enter a valid email';
+    if (!r.hasMatch(v!.trim())) return l10n.invalidEmail;
     return null;
   }
 
@@ -102,11 +103,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     }
   }
 
-  void _verifyCode() {
+  void _verifyCode(AppLocalizations l10n) {
     final code = _codeCtrls.map((c) => c.text).join();
     if (code.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the complete 6-digit code')),
+        SnackBar(content: Text(l10n.completeSixDigitCode)),
       );
       return;
     }
@@ -121,6 +122,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -160,7 +162,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 40),
                       child: Text(
-                        _title(),
+                        _title(l10n),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 30,
@@ -181,7 +183,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   duration: const Duration(milliseconds: 300),
                   child: KeyedSubtree(
                     key: ValueKey(_step),
-                    child: _buildStepContent(),
+                    child: _buildStepContent(l10n),
                   ),
                 ),
               ),
@@ -192,11 +194,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildStepContent() {
+  Widget _buildStepContent(AppLocalizations l10n) {
     return Column(
       children: [
         Text(
-          _description(),
+          _description(l10n),
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 15,
@@ -205,41 +207,42 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 28),
         switch (_step) {
-          _Step.credentials => _buildCredentials(),
-          _Step.verification => _buildVerification(),
-          _Step.newPassword => _buildNewPassword(),
+          _Step.credentials => _buildCredentials(l10n),
+          _Step.verification => _buildVerification(l10n),
+          _Step.newPassword => _buildNewPassword(l10n),
         },
       ],
     );
   }
 
-  Widget _buildCredentials() {
+  Widget _buildCredentials(AppLocalizations l10n) {
     return Form(
       key: _credentialsKey,
       child: Column(
         children: [
           _LabeledField(
-            label: 'USERNAME',
-            hint: 'johndoe123',
-            controller: _username,
-            validator: (v) => _required(v, 'Username'),
+            label: l10n.phoneNumber.toUpperCase(),
+            hint: '01xxxxxxxxx',
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            validator: (v) => _required(v, l10n.phoneRequired),
           ),
           const SizedBox(height: 16),
           _LabeledField(
-            label: 'EMAIL',
-            hint: 'johndoe@xyz.com',
+            label: l10n.email.toUpperCase(),
+            hint: l10n.emailHint,
             controller: _email,
             keyboardType: TextInputType.emailAddress,
-            validator: _validateEmail,
+            validator: (v) => _validateEmail(v, l10n),
           ),
           const SizedBox(height: 32),
-          _PrimaryButton(label: 'Send', onPressed: _submitCredentials),
+          _PrimaryButton(label: l10n.send, onPressed: _submitCredentials),
         ],
       ),
     );
   }
 
-  Widget _buildVerification() {
+  Widget _buildVerification(AppLocalizations l10n) {
     return Column(
       children: [
         Directionality(
@@ -299,7 +302,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
         const SizedBox(height: 32),
-        _PrimaryButton(label: 'Verify', onPressed: _verifyCode),
+        _PrimaryButton(label: l10n.verify, onPressed: () => _verifyCode(l10n)),
         const SizedBox(height: 16),
         TextButton(
           onPressed: () {
@@ -307,9 +310,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               c.clear();
             }
           },
-          child: const Text(
-            'Resend Code',
-            style: TextStyle(
+          child: Text(
+            l10n.resendCode,
+            style: const TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
             ),
@@ -319,7 +322,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildNewPassword() {
+  Widget _buildNewPassword(AppLocalizations l10n) {
     final mismatch = _newPass.text.isNotEmpty &&
         _confirmPass.text.isNotEmpty &&
         _newPass.text != _confirmPass.text;
@@ -329,13 +332,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: Column(
         children: [
           _LabeledField(
-            label: 'NEW PASSWORD',
-            hint: '••••••••••••',
+            label: l10n.newPassword.toUpperCase(),
+            hint: l10n.passwordHint,
             controller: _newPass,
             obscure: _obscureNew,
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Password is required';
-              if (v.length < 6) return 'At least 6 characters';
+              if (v == null || v.isEmpty) return l10n.passwordRequired;
+              if (v.length < 6) return l10n.passwordTooShort;
               return null;
             },
             onChanged: (_) => setState(() {}),
@@ -351,13 +354,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           const SizedBox(height: 16),
           _LabeledField(
-            label: 'CONFIRM NEW PASSWORD',
-            hint: '••••••••••••',
+            label: l10n.confirmPassword.toUpperCase(),
+            hint: l10n.passwordHint,
             controller: _confirmPass,
             obscure: _obscureConfirm,
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Please confirm password';
-              if (v != _newPass.text) return 'Passwords do not match';
+              if (v == null || v.isEmpty) return l10n.confirmPasswordRequired;
+              if (v != _newPass.text) return l10n.passwordsDoNotMatch;
               return null;
             },
             onChanged: (_) => setState(() {}),
@@ -374,14 +377,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           if (mismatch) ...[
             const SizedBox(height: 12),
-            const Text(
-              'Passwords do not match',
-              style: TextStyle(color: Colors.red, fontSize: 13),
+            Text(
+              l10n.passwordsDoNotMatch,
+              style: const TextStyle(color: Colors.red, fontSize: 13),
             ),
           ],
           const SizedBox(height: 24),
           _PrimaryButton(
-            label: 'Reset Password',
+            label: l10n.resetPassword,
             onPressed: (_newPass.text.isNotEmpty &&
                     _confirmPass.text.isNotEmpty &&
                     !mismatch)
@@ -487,7 +490,7 @@ class _PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF212121),
           foregroundColor: Colors.white,
-          disabledBackgroundColor: const Color(0xFF212121).withOpacity(0.5),
+          disabledBackgroundColor: const Color(0xFF212121).withValues(alpha: 0.5),
           disabledForegroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -511,7 +514,7 @@ class _CircleIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),

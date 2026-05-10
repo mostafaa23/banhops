@@ -188,6 +188,78 @@ abstract class AppLocalizations {
   /// **'Forgot Password?'**
   String get forgotPassword;
 
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @phoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number is required'**
+  String get phoneRequired;
+
+  /// No description provided for @forgotPasswordStep1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number and email to receive a verification code.'**
+  String get forgotPasswordStep1Desc;
+
+  /// No description provided for @forgotPasswordStep2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to your email. Enter it below.'**
+  String get forgotPasswordStep2Desc;
+
+  /// No description provided for @forgotPasswordStep3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a strong new password for your account.'**
+  String get forgotPasswordStep3Desc;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Code'**
+  String get verifyCode;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend Code'**
+  String get resendCode;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @completeSixDigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the complete 6-digit code'**
+  String get completeSixDigitCode;
+
   /// No description provided for @from.
   ///
   /// In en, this message translates to:
@@ -223,6 +295,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chat'**
   String get chat;
+
+  /// No description provided for @tripHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip History'**
+  String get tripHistory;
+
+  /// No description provided for @myTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'My Trips'**
+  String get myTrips;
+
+  /// No description provided for @clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear History?'**
+  String get clearHistory;
+
+  /// No description provided for @clearHistoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all trip history?'**
+  String get clearHistoryConfirm;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @noTripsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips yet'**
+  String get noTripsYet;
+
+  /// No description provided for @startPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Start planning your first trip to Benha!'**
+  String get startPlanning;
+
+  /// No description provided for @line.
+  ///
+  /// In en, this message translates to:
+  /// **'LINE'**
+  String get line;
+
+  /// No description provided for @routeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Route Details'**
+  String get routeDetails;
+
+  /// No description provided for @transportationOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transportation Options'**
+  String get transportationOptions;
+
+  /// No description provided for @smartTip.
+  ///
+  /// In en, this message translates to:
+  /// **'BanHops Smart Tip'**
+  String get smartTip;
+
+  /// No description provided for @askNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Now'**
+  String get askNow;
+
+  /// No description provided for @smartTipContent.
+  ///
+  /// In en, this message translates to:
+  /// **'If you want to save time and money, the microbus from Moassasa is your first choice. Tap here to ask anything else!'**
+  String get smartTipContent;
+
+  /// No description provided for @chatWithAI.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with AI Assistant'**
+  String get chatWithAI;
+
+  /// No description provided for @readyToHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'READY TO HELP YOU'**
+  String get readyToHelp;
+
+  /// No description provided for @bestMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'BEST MATCH'**
+  String get bestMatch;
+
+  /// No description provided for @pros.
+  ///
+  /// In en, this message translates to:
+  /// **'PROS'**
+  String get pros;
+
+  /// No description provided for @cons.
+  ///
+  /// In en, this message translates to:
+  /// **'CONS'**
+  String get cons;
+
+  /// No description provided for @welcomeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to'**
+  String get welcomeTo;
+
+  /// No description provided for @smartRouteToBenha.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Route to Benha'**
+  String get smartRouteToBenha;
+
+  /// No description provided for @pleaseSelectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a language.'**
+  String get pleaseSelectLanguage;
+
+  /// No description provided for @arabicNative.
+  ///
+  /// In en, this message translates to:
+  /// **'العربية'**
+  String get arabicNative;
+
+  /// No description provided for @englishNative.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get englishNative;
+
+  /// No description provided for @dontHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get dontHaveAccount;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @usernameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Username is required'**
+  String get usernameRequired;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get passwordRequired;
+
+  /// No description provided for @firstNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'First name is required'**
+  String get firstNameRequired;
+
+  /// No description provided for @lastNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name is required'**
+  String get lastNameRequired;
+
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get emailRequired;
+
+  /// No description provided for @confirmPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password is required'**
+  String get confirmPasswordRequired;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get invalidEmail;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get passwordTooShort;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'johndoe123'**
+  String get usernameHint;
+
+  /// No description provided for @passwordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'••••••••••••'**
+  String get passwordHint;
+
+  /// No description provided for @firstNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'John'**
+  String get firstNameHint;
+
+  /// No description provided for @lastNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Doe'**
+  String get lastNameHint;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'johndoe@xyz.com'**
+  String get emailHint;
+
+  /// No description provided for @trainLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Train Lines'**
+  String get trainLines;
+
+  /// No description provided for @journeyToBenhaStartsHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Your journey to Benha starts here'**
+  String get journeyToBenhaStartsHere;
+
+  /// No description provided for @backToSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Selection'**
+  String get backToSelection;
+
+  /// No description provided for @trainMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Train Map'**
+  String get trainMap;
+
+  /// No description provided for @tapToZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to zoom'**
+  String get tapToZoom;
+
+  /// No description provided for @chooseYourRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your route'**
+  String get chooseYourRoute;
+
+  /// No description provided for @startingFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting from {city}'**
+  String startingFrom(Object city);
+
+  /// No description provided for @allTripsEndAtBenha.
+  ///
+  /// In en, this message translates to:
+  /// **'All trips end at Benha Station'**
+  String get allTripsEndAtBenha;
+
+  /// No description provided for @destinationBenha.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination: Benha'**
+  String get destinationBenha;
+
+  /// No description provided for @finalArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'FINAL ARRIVAL'**
+  String get finalArrival;
+
+  /// No description provided for @stationNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'STATION {number}'**
+  String stationNumber(Object number);
+
+  /// No description provided for @liveBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get liveBadge;
+
+  /// No description provided for @getRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Routes'**
+  String get getRoutes;
+
+  /// No description provided for @banHopsAI.
+  ///
+  /// In en, this message translates to:
+  /// **'BanHops AI'**
+  String get banHopsAI;
+
+  /// No description provided for @online.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get online;
+
+  /// No description provided for @typeAMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get typeAMessage;
+
+  /// No description provided for @chatIntroGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello! I\'m the BanHops AI Assistant. How can I help you today?'**
+  String get chatIntroGeneric;
+
+  /// No description provided for @chatIntroRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello! I\'m here to help you with your trip from {from} to {to}. How can I help you?'**
+  String chatIntroRoute(Object from, Object to);
+
+  /// No description provided for @aiResponse1.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct microbus is currently the best choice to avoid traffic in Benha.'**
+  String get aiResponse1;
+
+  /// No description provided for @aiResponse2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can reach Benha University within 30 mins if you move now.'**
+  String get aiResponse2;
+
+  /// No description provided for @aiResponse3.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip cost from your location to Benha center is about 15-20 EGP by microbus.'**
+  String get aiResponse3;
+
+  /// No description provided for @aiResponse4.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure to charge your phone, Benha is beautiful for photos today!'**
+  String get aiResponse4;
+
+  /// No description provided for @aiResponse5.
+  ///
+  /// In en, this message translates to:
+  /// **'I can book a taxi for you if you prefer total comfort.'**
+  String get aiResponse5;
 }
 
 class _AppLocalizationsDelegate

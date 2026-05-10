@@ -30,6 +30,7 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1E293B),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -41,19 +42,25 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
         child: SafeArea(
           child: Column(
             children: [
+              // ── Header ──────────────────────────────────
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Back button
                     GestureDetector(
                       onTap: widget.onBack,
                       child: Container(
-                        width: 40,
-                        height: 40,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          // ✅ glass white/10
+                          color: Colors.white.withValues(alpha: 0.10),
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.10),
+                          ),
                         ),
                         child: const Icon(
                           Icons.arrow_back,
@@ -62,23 +69,35 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+
+                    const SizedBox(height: 28),
+
+                    // Title row
                     Row(
                       children: [
                         Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            // ✅ Primary #4A90E2
+                            color: const Color(0xFF4A90E2),
                             shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4A90E2)
+                                    .withValues(alpha: 0.30),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
                           ),
                           child: const Icon(
                             Icons.language,
                             color: Colors.white,
-                            size: 24,
+                            size: 26,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 14),
                         const Text(
                           'Select Language',
                           style: TextStyle(
@@ -89,10 +108,13 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+
+                    const SizedBox(height: 10),
+
                     Text(
                       'Current: ${widget.current.languageCode == 'ar' ? 'العربية' : 'English'}',
                       style: const TextStyle(
+                        // ✅ #CBD5E1 = slate-300
                         color: Color(0xFFCBD5E1),
                         fontSize: 14,
                       ),
@@ -100,6 +122,8 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                   ],
                 ),
               ),
+
+              // ── Language tiles ───────────────────────────
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
@@ -110,9 +134,8 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                         title: 'العربية',
                         subtitle: 'Arabic',
                         selected: _selected.languageCode == 'ar',
-                        onTap: () => setState(
-                          () => _selected = const Locale('ar'),
-                        ),
+                        onTap: () =>
+                            setState(() => _selected = const Locale('ar')),
                       ),
                       const SizedBox(height: 12),
                       _LanguageTile(
@@ -120,25 +143,26 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                         title: 'English',
                         subtitle: 'الإنجليزية',
                         selected: _selected.languageCode == 'en',
-                        onTap: () => setState(
-                          () => _selected = const Locale('en'),
-                        ),
+                        onTap: () =>
+                            setState(() => _selected = const Locale('en')),
                       ),
                       const SizedBox(height: 24),
+
+                      // Info note
                       Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.10),
                           ),
                         ),
                         child: const Text(
                           'The new language will be applied to all app screens',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Color(0xFFCBD5E1),
+                            color: Color(0xFFCBD5E1), // ✅ slate-300
                             fontSize: 13,
                           ),
                         ),
@@ -147,16 +171,22 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                   ),
                 ),
               ),
+
+              // ── Apply Button ─────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 58,
                   child: ElevatedButton.icon(
                     onPressed: () => widget.onApply(_selected),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      // ✅ Primary #4A90E2
+                      backgroundColor: const Color(0xFF4A90E2),
                       foregroundColor: Colors.white,
+                      elevation: 8,
+                      shadowColor:
+                      const Color(0xFF4A90E2).withValues(alpha: 0.40),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(28),
                       ),
@@ -165,7 +195,7 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    icon: const Icon(Icons.check),
+                    icon: const Icon(Icons.check, size: 20),
                     label: const Text('Apply'),
                   ),
                 ),
@@ -178,6 +208,7 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
   }
 }
 
+// ── Language Tile ────────────────────────────────────────────────
 class _LanguageTile extends StatelessWidget {
   final String flag;
   final String title;
@@ -202,31 +233,40 @@ class _LanguageTile extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primary.withOpacity(0.2)
-              : Colors.white.withOpacity(0.1),
+          // ✅ selected: Primary/20
+              ? const Color(0xFF4A90E2).withValues(alpha: 0.20)
+          // ✅ default: glass white/10
+              : Colors.white.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: selected
-                ? AppColors.primary
-                : Colors.white.withOpacity(0.1),
+            // ✅ selected border: Primary #4A90E2
+                ? const Color(0xFF4A90E2)
+            // ✅ default border: white/10
+                : Colors.white.withValues(alpha: 0.10),
             width: 2,
           ),
         ),
         child: Row(
           children: [
-            Container(
-              width: 48,
-              height: 48,
+            // Flag circle
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.primary
-                    : Colors.white.withOpacity(0.1),
+                    ? const Color(0xFF4A90E2) // ✅ Primary
+                    : Colors.white.withValues(alpha: 0.10), // ✅ glass
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Text(flag, style: const TextStyle(fontSize: 22)),
+              child: Text(flag, style: const TextStyle(fontSize: 24)),
             ),
-            const SizedBox(width: 14),
+
+            const SizedBox(width: 16),
+
+            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,28 +279,32 @@ class _LanguageTile extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      color: Color(0xFFCBD5E1),
+                      color: Color(0xFFCBD5E1), // ✅ slate-300
                       fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
+
+            // Check badge
             if (selected)
-              Container(
-                width: 32,
-                height: 32,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 36,
+                height: 36,
                 decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                  color: Color(0xFF4A90E2), // ✅ Primary
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.check,
                   color: Colors.white,
-                  size: 18,
+                  size: 20,
                 ),
               ),
           ],

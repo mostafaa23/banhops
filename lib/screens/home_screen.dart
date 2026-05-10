@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController(text: 'Your current location');
   String? _selectedDestination;
 
-  // ✅ إحداثيات كل وجهة
+  //  إحداثيات كل وجه
   static const Map<String, Map<String, double>> _destinationCoords = {
     'el vell':      {'lat': 30.4634, 'lng': 31.1790},
     'mokf':         {'lat': 30.4612, 'lng': 31.1820},
@@ -124,112 +124,105 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primary,
-      body: Stack(
+      extendBody: true,
+      body: Column(
         children: [
-          Column(
-            children: [
-              const _BlueHeader(),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(36),
-                    topRight: Radius.circular(36),
-                  ),
-                  child: Container(
-                    color: Colors.white,
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(20, 28, 20, 140),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+          const _BlueHeader(),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(36),
+                topRight: Radius.circular(36),
+              ),
+              child: Container(
+                color: Colors.white,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 140),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _SearchCard(
+                        fromController: _fromCtrl,
+                        selectedDestination: _selectedDestination,
+                        onTapTo: _openDestinationPicker,
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // ✅ زرار Google Maps يظهر لما يختار وجهة
+                      if (_selectedDestination != null)
+                        _GoogleMapsButton(
+                          destination: _selectedDestination!,
+                          onTap: () => _openGoogleMaps(_selectedDestination!),
+                        ),
+
+                      const SizedBox(height: 12),
+
+                      _GetRoutesButton(
+                        enabled: _selectedDestination != null,
+                        onPressed: _handleGetRoutes,
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      const Text(
+                        'Popular Zones',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 1.1,
                         children: [
-                          _SearchCard(
-                            fromController: _fromCtrl,
-                            selectedDestination: _selectedDestination,
-                            onTapTo: _openDestinationPicker,
+                          _ZoneCard(
+                            label: 'University',
+                            emoji: '🎓',
+                            bgColor: const Color(0xFFFFF7ED),
+                            onTap: _openCollegePicker,
                           ),
-
-                          const SizedBox(height: 12),
-
-                          // ✅ زرار Google Maps يظهر لما يختار وجهة
-                          if (_selectedDestination != null)
-                            _GoogleMapsButton(
-                              destination: _selectedDestination!,
-                              onTap: () => _openGoogleMaps(_selectedDestination!),
-                            ),
-
-                          const SizedBox(height: 12),
-
-                          _GetRoutesButton(
-                            enabled: _selectedDestination != null,
-                            onPressed: _handleGetRoutes,
+                          _ZoneCard(
+                            label: 'Hospital',
+                            emoji: '🏥',
+                            bgColor: const Color(0xFFFEF2F2),
+                            onTap: () {},
                           ),
-
-                          const SizedBox(height: 32),
-
-                          const Text(
-                            'Popular Zones',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.textPrimary,
-                            ),
+                          _ZoneCard(
+                            label: 'Restaurants',
+                            emoji: '🍕',
+                            bgColor: const Color(0xFFF0FDF4),
+                            onTap: () {},
                           ),
-                          const SizedBox(height: 16),
-
-                          GridView.count(
-                            crossAxisCount: 2,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 1.1,
-                            children: [
-                              _ZoneCard(
-                                label: 'University',
-                                emoji: '🎓',
-                                bgColor: const Color(0xFFFFF7ED),
-                                onTap: _openCollegePicker,
-                              ),
-                              _ZoneCard(
-                                label: 'Hospital',
-                                emoji: '🏥',
-                                bgColor: const Color(0xFFFEF2F2),
-                                onTap: () {},
-                              ),
-                              _ZoneCard(
-                                label: 'Restaurants',
-                                emoji: '🍕',
-                                bgColor: const Color(0xFFF0FDF4),
-                                onTap: () {},
-                              ),
-                              _ZoneCard(
-                                label: 'Cafés',
-                                emoji: '☕',
-                                bgColor: const Color(0xFFFFFBEB),
-                                onTap: () {},
-                              ),
-                            ],
+                          _ZoneCard(
+                            label: 'Cafés',
+                            emoji: '☕',
+                            bgColor: const Color(0xFFFFFBEB),
+                            onTap: () {},
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: BottomNavBar(
-              active: NavTab.home,
-              onTap: widget.onNavigate,
             ),
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavBar(
+        active: NavTab.home,
+        onTap: widget.onNavigate,
+      ),
     );
+
   }
 }
 

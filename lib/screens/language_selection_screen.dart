@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 class LanguageSelectionScreen extends StatelessWidget {
@@ -8,6 +9,8 @@ class LanguageSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.primary,
       body: SafeArea(
@@ -22,7 +25,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                 width: 140,
                 height: 140,
                 child: Stack(
-                  clipBehavior: Clip.none, // ✅ Fix: عشان الصورة متتقطعش
+                  clipBehavior: Clip.none,
                   alignment: Alignment.center,
                   children: [
                     Container(
@@ -33,7 +36,7 @@ class LanguageSelectionScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15), // ✅ Fix
+                            color: Colors.black.withValues(alpha: 0.15),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -55,11 +58,10 @@ class LanguageSelectionScreen extends StatelessWidget {
               const SizedBox(height: 48),
 
               // Headings
-              const Text(
-                'الرجاء اختيار لغة',
+              Text(
+                l10n.selectLanguage,
                 textAlign: TextAlign.center,
-                textDirection: TextDirection.rtl,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   height: 1.3,
@@ -67,10 +69,10 @@ class LanguageSelectionScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Please select a language.',
+                l10n.pleaseSelectLanguage,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9), // ✅ Fix
+                  color: Colors.white.withValues(alpha: 0.9),
                   fontSize: 16,
                 ),
               ),
@@ -79,12 +81,12 @@ class LanguageSelectionScreen extends StatelessWidget {
 
               // Language buttons
               _LanguageButton(
-                label: 'العربية',
+                label: l10n.arabicNative,
                 onTap: () => onLanguageSelected(const Locale('ar')),
               ),
               const SizedBox(height: 16),
               _LanguageButton(
-                label: 'English',
+                label: l10n.englishNative,
                 onTap: () => onLanguageSelected(const Locale('en')),
               ),
 
@@ -92,16 +94,16 @@ class LanguageSelectionScreen extends StatelessWidget {
 
               // Footer
               Text(
-                'Welcome to',
+                l10n.welcomeTo,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8), // ✅ Fix
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 14,
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
-                'BanHops',
-                style: TextStyle(
+              Text(
+                l10n.appName,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -109,9 +111,9 @@ class LanguageSelectionScreen extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Smart Route to Benha',
+                l10n.smartRouteToBenha,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7), // ✅ Fix
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
               ),

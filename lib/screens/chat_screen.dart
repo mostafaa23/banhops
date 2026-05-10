@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 
@@ -39,27 +40,34 @@ class _ChatScreenState extends State<ChatScreen> {
   final _scrollCtrl = ScrollController();
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
+  bool _isIntroAdded = false;
 
-  static const _aiResponses = [
-    'Direct microbus is currently the best choice to avoid traffic in Benha.',
-    'You can reach Benha University within 30 mins if you move now.',
-    'Trip cost from your location to Benha center is about 15-20 EGP by microbus.',
-    'Make sure to charge your phone, Benha is beautiful for photos today!',
-    'I can book a taxi for you if you prefer total comfort.',
-  ];
+  List<String> _getAiResponses(AppLocalizations l10n) {
+    return [
+      l10n.aiResponse1,
+      l10n.aiResponse2,
+      l10n.aiResponse3,
+      l10n.aiResponse4,
+      l10n.aiResponse5,
+    ];
+  }
 
   @override
-  void initState() {
-    super.initState();
-    final intro = (widget.from != null && widget.to != null)
-        ? "Hello! I'm here to help you with your trip from ${widget.from} to ${widget.to}. How can I help you?"
-        : "Hello! I'm the BanHops AI Assistant. How can I help you today?";
-    _messages.add(ChatMessage(
-      id: 1,
-      text: intro,
-      isUser: false,
-      timestamp: DateTime.now(),
-    ));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isIntroAdded) {
+      final l10n = AppLocalizations.of(context)!;
+      final intro = (widget.from != null && widget.to != null)
+          ? l10n.chatIntroRoute(widget.from!, widget.to!)
+          : l10n.chatIntroGeneric;
+      _messages.add(ChatMessage(
+        id: 1,
+        text: intro,
+        isUser: false,
+        timestamp: DateTime.now(),
+      ));
+      _isIntroAdded = true;
+    }
   }
 
   @override
@@ -84,6 +92,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void _send() {
     final text = _ctrl.text.trim();
     if (text.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
+    final responses = _getAiResponses(l10n);
+
     setState(() {
       _messages.add(ChatMessage(
         id: _messages.length + 1,
@@ -102,7 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _isTyping = false;
         _messages.add(ChatMessage(
           id: _messages.length + 1,
-          text: _aiResponses[Random().nextInt(_aiResponses.length)],
+          text: responses[Random().nextInt(responses.length)],
           isUser: false,
           timestamp: DateTime.now(),
         ));
@@ -119,175 +130,188 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
+    // ✅ الـ navBarHeight بنحسبها عشان نعرف نضيف padding صح
+    const navBarHeight = 10.0; // تقريبي — ارتفاع الـ BottomNavBar
+
     return Scaffold(
+      // ✅ مهم: يخلي الـ scaffold يتحرك لفوق مع الكيبورد
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFF8FAFC),
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              // Header
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
-                child: Row(
-                  children: [
-                    Container(
+          // ── Header ──────────────────────────────────────
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4A90E2), Color(0xFF2563EB)],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.smart_toy,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.banHopsAI,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            l10n.online,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Messages ─────────────────────────────────────
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollCtrl,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              itemCount: _messages.length + (_isTyping ? 1 : 0),
+              itemBuilder: (_, i) {
+                if (i == _messages.length) return const _TypingBubble();
+                return _MessageBubble(
+                  message: _messages[i],
+                  timeLabel: _formatTime(_messages[i].timestamp),
+                );
+              },
+            ),
+          ),
+
+          // ── Composer ──────────────────────────────────────
+          // ✅ لما الكيبورد مفتوح: padding بسيط فقط
+          // ✅ لما الكيبورد مقفول: نضيف مسافة لفوق الـ BottomNavBar
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.fromLTRB(
+              12,
+              14,
+              12,
+              isKeyboardOpen
+                  ? 14 // كيبورد مفتوح — الـ Scaffold بيتحرك لفوق تلقائياً
+                  : navBarHeight, // كيبورد مقفول — نترك مسافة للـ BottomNavBar
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.attach_file,
+                      color: AppColors.textMuted),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 4),
+                    child: TextField(
+                      controller: _ctrl,
+                      textInputAction: TextInputAction.newline,
+                      minLines: 1,
+                      maxLines: 5,
+                      decoration: InputDecoration(
+                        hintText: l10n.typeAMessage,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        filled: false,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: GestureDetector(
+                    onTap: _send,
+                    child: Container(
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF4A90E2), Color(0xFF2563EB)],
                         ),
-                        borderRadius: BorderRadius.circular(16),
+                        shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
+                            color: AppColors.primary.withValues(alpha: 0.4),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: const Icon(
-                        Icons.smart_toy,
+                        Icons.send,
                         color: Colors.white,
+                        size: 20,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'BanHops AI',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: Colors.green,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                'Online',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.more_vert),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-
-              // Messages
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollCtrl,
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                  itemCount: _messages.length + (_isTyping ? 1 : 0),
-                  itemBuilder: (_, i) {
-                    if (i == _messages.length) return const _TypingBubble();
-                    return _MessageBubble(
-                      message: _messages[i],
-                      timeLabel: _formatTime(_messages[i].timestamp),
-                    );
-                  },
-                ),
-              ),
-
-              // Composer
-              Container(
-                color: Colors.white,
-                padding: EdgeInsets.fromLTRB(
-                  12,
-                  10,
-                  12,
-                  MediaQuery.of(context).viewInsets.bottom + 100,
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.attach_file,
-                          color: AppColors.textMuted),
-                    ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: TextField(
-                          controller: _ctrl,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => _send(),
-                          decoration: const InputDecoration(
-                            hintText: 'Type a message...',
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _send,
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF4A90E2), Color(0xFF2563EB)],
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.send,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: BottomNavBar(active: NavTab.chat, onTap: widget.onNavigate),
+              ],
+            ),
           ),
         ],
+      ),
+
+      // ✅ الـ BottomNavBar كـ bottomNavigationBar في الـ Scaffold
+      // بكده هي مش داخل الـ Stack ومش بتأثر على الـ composer
+      bottomNavigationBar: isKeyboardOpen
+          ? null // اختفي لما الكيبورد يظهر
+          : BottomNavBar(
+        active: NavTab.chat,
+        onTap: widget.onNavigate,
       ),
     );
   }
@@ -306,7 +330,7 @@ class _MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isUser)
@@ -332,7 +356,7 @@ class _MessageBubble extends StatelessWidget {
                 maxWidth: MediaQuery.of(context).size.width * 0.72,
               ),
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: isUser ? AppColors.primary : Colors.white,
                 borderRadius: BorderRadius.only(
@@ -343,7 +367,7 @@ class _MessageBubble extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -365,7 +389,7 @@ class _MessageBubble extends StatelessWidget {
                     timeLabel,
                     style: TextStyle(
                       color: isUser
-                          ? Colors.white.withOpacity(0.7)
+                          ? Colors.white.withValues(alpha: 0.7)
                           : AppColors.textMuted,
                       fontSize: 11,
                     ),
@@ -422,12 +446,12 @@ class _TypingBubbleState extends State<_TypingBubble>
               ),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.smart_toy,
-                color: Colors.white, size: 18),
+            child:
+            const Icon(Icons.smart_toy, color: Colors.white, size: 18),
           ),
           Container(
             padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
