@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
+import '../utils/itinerary_builder.dart';
 import '../widgets/bottom_nav_bar.dart';
 
 class ChatMessage {
@@ -23,12 +24,14 @@ class ChatScreen extends StatefulWidget {
   final ValueChanged<NavTab> onNavigate;
   final String? from;
   final String? to;
+  final String? routeType; // 'microbus' | 'train' | null
 
   const ChatScreen({
     super.key,
     required this.onNavigate,
     this.from,
     this.to,
+    this.routeType,
   });
 
   @override
@@ -55,19 +58,35 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_isIntroAdded) {
-      final l10n = AppLocalizations.of(context)!;
-      final intro = (widget.from != null && widget.to != null)
-          ? l10n.chatIntroRoute(widget.from!, widget.to!)
-          : l10n.chatIntroGeneric;
-      _messages.add(ChatMessage(
-        id: 1,
-        text: intro,
-        isUser: false,
-        timestamp: DateTime.now(),
-      ));
-      _isIntroAdded = true;
+    if (_isIntroAdded) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final lang = l10n.localeName;
+    String intro;
+
+    if (widget.from != null &&
+        widget.to != null &&
+        widget.routeType != null) {
+      // ✅ Detailed itinerary
+      intro = buildItinerary(
+        from: widget.from!,
+        to: widget.to!,
+        routeType: widget.routeType!,
+        lang: lang,
+      );
+    } else if (widget.from != null && widget.to != null) {
+      intro = l10n.chatIntroRoute(widget.from!, widget.to!);
+    } else {
+      intro = l10n.chatIntroGeneric;
     }
+
+    _messages.add(ChatMessage(
+      id: 1,
+      text: intro,
+      isUser: false,
+      timestamp: DateTime.now(),
+    ));
+    _isIntroAdded = true;
   }
 
   @override
@@ -132,12 +151,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
-
-    // ✅ الـ navBarHeight بنحسبها عشان نعرف نضيف padding صح
-    const navBarHeight = 10.0; // تقريبي — ارتفاع الـ BottomNavBar
+    const navBarHeight = 8.0;
 
     return Scaffold(
-      // ✅ مهم: يخلي الـ scaffold يتحرك لفوق مع الكيبورد
       resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFF8FAFC),
       body: Column(
@@ -164,10 +180,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.smart_toy,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.smart_toy, color: Colors.white),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -227,17 +240,11 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
 
           // ── Composer ──────────────────────────────────────
-          // ✅ لما الكيبورد مفتوح: padding بسيط فقط
-          // ✅ لما الكيبورد مقفول: نضيف مسافة لفوق الـ BottomNavBar
           Container(
-            color: Colors.white,
+            color: const Color(0xFFF8FAFC),
             padding: EdgeInsets.fromLTRB(
-              12,
-              14,
-              12,
-              isKeyboardOpen
-                  ? 14 // كيبورد مفتوح — الـ Scaffold بيتحرك لفوق تلقائياً
-                  : navBarHeight, // كيبورد مقفول — نترك مسافة للـ BottomNavBar
+              12, 14, 12,
+              isKeyboardOpen ? 14 : navBarHeight,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -291,11 +298,8 @@ class _ChatScreenState extends State<ChatScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.send,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      child: const Icon(Icons.send,
+                          color: Colors.white, size: 20),
                     ),
                   ),
                 ),
@@ -304,11 +308,8 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
-
-      // ✅ الـ BottomNavBar كـ bottomNavigationBar في الـ Scaffold
-      // بكده هي مش داخل الـ Stack ومش بتأثر على الـ composer
       bottomNavigationBar: isKeyboardOpen
-          ? null // اختفي لما الكيبورد يظهر
+          ? null
           : BottomNavBar(
         active: NavTab.chat,
         onTap: widget.onNavigate,
@@ -317,6 +318,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
+// ── Message Bubble ────────────────────────────────────────────────
 class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final String timeLabel;
@@ -338,25 +340,22 @@ class _MessageBubble extends StatelessWidget {
               width: 32,
               height: 32,
               margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
                   colors: [Color(0xFF4A90E2), Color(0xFF2563EB)],
                 ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.smart_toy,
-                color: Colors.white,
-                size: 18,
-              ),
+              child: const Icon(Icons.smart_toy,
+                  color: Colors.white, size: 18),
             ),
           Flexible(
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.72,
               ),
-              padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: isUser ? AppColors.primary : Colors.white,
                 borderRadius: BorderRadius.only(
@@ -376,12 +375,16 @@ class _MessageBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // ✅ softWrap + height: 1.5 للـ itinerary multiline
                   Text(
                     message.text,
+                    softWrap: true,
                     style: TextStyle(
-                      color: isUser ? Colors.white : AppColors.textPrimary,
+                      color: isUser
+                          ? Colors.white
+                          : AppColors.textPrimary,
                       fontSize: 15,
-                      height: 1.4,
+                      height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -404,6 +407,7 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
+// ── Typing Bubble ─────────────────────────────────────────────────
 class _TypingBubble extends StatefulWidget {
   const _TypingBubble();
 
@@ -450,8 +454,8 @@ class _TypingBubbleState extends State<_TypingBubble>
             const Icon(Icons.smart_toy, color: Colors.white, size: 18),
           ),
           Container(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),

@@ -3,6 +3,44 @@ import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 
+// ── Data ─────────────────────────────────────────────────────────
+
+const Map<String, List<String>> _governorateData = {
+  'Cairo': [
+    'Ahmed Helmy', 'Abbasiya', 'Ramses', 'Heliopolis', 'Nasr City', 'Maadi'
+  ],
+  'Giza': [
+    'Giza Square', 'Faisal', 'Haram', 'Dokki', 'Mohandessin'
+  ],
+  'Qalyubia': [
+    'Shubra El Kheima', 'Qalyub', 'Kafr Shukr', 'Al-Obour'
+  ],
+  'Sharqia': [
+    'Zagazig', 'Belbeis', '10th of Ramadan'
+  ],
+  'Monufia': [
+    'Shebin El Kom', 'Quesna', 'Menouf'
+  ],
+  'Gharbia': [
+    'Tanta', 'Mahalla', 'Kafr El Zayat'
+  ],
+  'Alexandria': [
+    'Sidi Gaber', 'Moharram Bek', 'Smouha'
+  ],
+};
+
+const List<String> _benhaPlaces = [
+  'Benha Main Bus Terminal',
+  'Benha Train Station',
+  'Benha University',
+  'Benha University Hospital',
+  'El Mansheya',
+  'Wesst El Balad',
+  'El Fellah',
+];
+
+// ── HomeScreen ────────────────────────────────────────────────────
+
 class HomeScreen extends StatefulWidget {
   final ValueChanged<NavTab> onNavigate;
   final void Function(String from, String to) onShowRouteDetails;
@@ -18,33 +56,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _fromCtrl =
-  TextEditingController(text: 'Your current location');
-  String? _selectedDestination;
+  // ── Dropdown state ──────────────────────────────────────────────
+  String _selectedGovernorate = 'Cairo';
+  late String _selectedCity;
+  String _selectedBenhaPlace = _benhaPlaces.first;
 
-  //  إحداثيات كل وجه
-  static const Map<String, Map<String, double>> _destinationCoords = {
-    'el vell':      {'lat': 30.4634, 'lng': 31.1790},
-    'mokf':         {'lat': 30.4612, 'lng': 31.1820},
-    'west balad':   {'lat': 30.4650, 'lng': 31.1800},
-    'el mansia':    {'lat': 30.4670, 'lng': 31.1760},
-    // Colleges
-    'Faculty of Commerce':          {'lat': 30.4677, 'lng': 31.1838},
-    'Faculty of Arts':              {'lat': 30.4680, 'lng': 31.1842},
-    'Faculty of Education':         {'lat': 30.4683, 'lng': 31.1845},
-    'Faculty of Specific Education':{'lat': 30.4685, 'lng': 31.1848},
-    'Faculty of Physical Education':{'lat': 30.4688, 'lng': 31.1851},
-    'Faculty of Law':               {'lat': 30.4690, 'lng': 31.1854},
-    'Faculty of Applied Arts':      {'lat': 30.4692, 'lng': 31.1857},
-  };
+  @override
+  void initState() {
+    super.initState();
+    _selectedCity = _governorateData['Cairo']!.first;
+  }
 
-  static const _destinations = [
-    {'ar': 'الفلل',    'en': 'el vell'},
-    {'ar': 'الموقف',   'en': 'mokf'},
-    {'ar': 'وسط البلد','en': 'west balad'},
-    {'ar': 'المنشية',  'en': 'el mansia'},
-  ];
+  void _onGovernorateChanged(String? value) {
+    if (value == null) return;
+    setState(() {
+      _selectedGovernorate = value;
+      _selectedCity = _governorateData[value]!.first;
+    });
+  }
 
+  void _handleGetRoutes() {
+    final from = '$_selectedCity, $_selectedGovernorate';
+    final to = _selectedBenhaPlace;
+    widget.onShowRouteDetails(from, to);
+  }
+
+  // ── Colleges quick-pick (kept from old screen) ──────────────────
   static const _colleges = [
     'Faculty of Commerce',
     'Faculty of Arts',
@@ -54,50 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
     'Faculty of Law',
     'Faculty of Applied Arts',
   ];
-
-  // ✅ فتح Google Maps
-  Future<void> _openGoogleMaps(String destination) async {
-    final coords = _destinationCoords[destination];
-    if (coords == null) return;
-
-    final lat = coords['lat']!;
-    final lng = coords['lng']!;
-
-    final uri = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-    );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open Google Maps')),
-        );
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _fromCtrl.dispose();
-    super.dispose();
-  }
-
-  void _openDestinationPicker() async {
-    final result = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => _DestinationSheet(
-        title: 'Select Destination',
-        items: _destinations.map((e) => e['en']!).toList(),
-        accent: AppColors.primary,
-        icon: Icons.location_on,
-      ),
-    );
-    if (result != null) setState(() => _selectedDestination = result);
-  }
 
   void _openCollegePicker() async {
     final result = await showModalBottomSheet<String>(
@@ -112,12 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
         icon: Icons.school_outlined,
       ),
     );
-    if (result != null) setState(() => _selectedDestination = result);
-  }
-
-  void _handleGetRoutes() {
-    if (_selectedDestination == null) return;
-    widget.onShowRouteDetails(_fromCtrl.text, _selectedDestination!);
+    if (result != null) {
+      setState(() => _selectedBenhaPlace = result);
+    }
   }
 
   @override
@@ -141,30 +131,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _SearchCard(
-                        fromController: _fromCtrl,
-                        selectedDestination: _selectedDestination,
-                        onTapTo: _openDestinationPicker,
-                      ),
 
-                      const SizedBox(height: 12),
-
-                      // ✅ زرار Google Maps يظهر لما يختار وجهة
-                      if (_selectedDestination != null)
-                        _GoogleMapsButton(
-                          destination: _selectedDestination!,
-                          onTap: () => _openGoogleMaps(_selectedDestination!),
-                        ),
-
-                      const SizedBox(height: 12),
-
-                      _GetRoutesButton(
-                        enabled: _selectedDestination != null,
-                        onPressed: _handleGetRoutes,
+                      // ── Plan Trip Card ─────────────────────────
+                      _PlanTripCard(
+                        selectedGovernorate: _selectedGovernorate,
+                        selectedCity: _selectedCity,
+                        selectedBenhaPlace: _selectedBenhaPlace,
+                        cities: _governorateData[_selectedGovernorate]!,
+                        onGovernorateChanged: _onGovernorateChanged,
+                        onCityChanged: (v) {
+                          if (v != null) setState(() => _selectedCity = v);
+                        },
+                        onBenhaPlaceChanged: (v) {
+                          if (v != null) setState(() => _selectedBenhaPlace = v);
+                        },
+                        onGetRoutes: _handleGetRoutes,
                       ),
 
                       const SizedBox(height: 32),
 
+                      // ── Popular Zones ──────────────────────────
                       const Text(
                         'Popular Zones',
                         style: TextStyle(
@@ -193,19 +179,28 @@ class _HomeScreenState extends State<HomeScreen> {
                             label: 'Hospital',
                             emoji: '🏥',
                             bgColor: const Color(0xFFFEF2F2),
-                            onTap: () {},
+                            onTap: () {
+                              setState(() => _selectedBenhaPlace =
+                              'Benha University Hospital');
+                            },
                           ),
                           _ZoneCard(
-                            label: 'Restaurants',
-                            emoji: '🍕',
+                            label: 'Bus Terminal',
+                            emoji: '🚌',
                             bgColor: const Color(0xFFF0FDF4),
-                            onTap: () {},
+                            onTap: () {
+                              setState(() => _selectedBenhaPlace =
+                              'Benha Main Bus Terminal');
+                            },
                           ),
                           _ZoneCard(
-                            label: 'Cafés',
-                            emoji: '☕',
+                            label: 'Train Station',
+                            emoji: '🚆',
                             bgColor: const Color(0xFFFFFBEB),
-                            onTap: () {},
+                            onTap: () {
+                              setState(() =>
+                              _selectedBenhaPlace = 'Benha Train Station');
+                            },
                           ),
                         ],
                       ),
@@ -222,93 +217,286 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: widget.onNavigate,
       ),
     );
-
   }
 }
 
-// ✅ زرار Google Maps
-class _GoogleMapsButton extends StatelessWidget {
-  final String destination;
-  final VoidCallback onTap;
+// ── Plan Trip Card ────────────────────────────────────────────────
+class _PlanTripCard extends StatelessWidget {
+  final String selectedGovernorate;
+  final String selectedCity;
+  final String selectedBenhaPlace;
+  final List<String> cities;
+  final ValueChanged<String?> onGovernorateChanged;
+  final ValueChanged<String?> onCityChanged;
+  final ValueChanged<String?> onBenhaPlaceChanged;
+  final VoidCallback onGetRoutes;
 
-  const _GoogleMapsButton({
-    required this.destination,
-    required this.onTap,
+  const _PlanTripCard({
+    required this.selectedGovernorate,
+    required this.selectedCity,
+    required this.selectedBenhaPlace,
+    required this.cities,
+    required this.onGovernorateChanged,
+    required this.onCityChanged,
+    required this.onBenhaPlaceChanged,
+    required this.onGetRoutes,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8F4FD),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF4A90E2).withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.10),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          // ── Title ──────────────────────────────────────
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.route_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Plan Trip',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF111827),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // ── 1. Governorate ─────────────────────────────
+          _DropdownField(
+            label: 'SELECT GOVERNORATE',
+            value: selectedGovernorate,
+            items: _governorateData.keys.toList(),
+            onChanged: onGovernorateChanged,
+            prefixIcon: Icons.map_outlined,
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── 2. City ────────────────────────────────────
+          _DropdownField(
+            label: 'SELECT CITY / AREA',
+            value: selectedCity,
+            items: cities,
+            onChanged: onCityChanged,
+            prefixIcon: Icons.location_city_outlined,
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Divider with arrow ─────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 1,
+                  color: const Color(0xFFE5E7EB),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.arrow_downward_rounded,
+                  color: AppColors.primary,
+                  size: 16,
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  color: const Color(0xFFE5E7EB),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── 3. Benha Place ─────────────────────────────
+          _DropdownField(
+            label: 'WHERE IN BENHA?',
+            value: selectedBenhaPlace,
+            items: _benhaPlaces,
+            onChanged: onBenhaPlaceChanged,
+            prefixIcon: Icons.place_outlined,
+            accentColor: const Color(0xFF059669), // green
+          ),
+
+          const SizedBox(height: 24),
+
+          // ── Get Routes Button ──────────────────────────
+          SizedBox(
+            width: double.infinity,
+            child: GestureDetector(
+              onTap: onGetRoutes,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0xFF4A90E2), Color(0xFF2563EB)],
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.map_outlined,
-                color: Color(0xFF4A90E2),
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'View on Google Maps',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1D3557),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4A90E2).withValues(alpha: 0.40),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    destination,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF4A90E2),
-                      fontWeight: FontWeight.w600,
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      'Get Routes',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -0.2,
+                      ),
                     ),
-                  ),
-                ],
+                    SizedBox(width: 10),
+                    Icon(Icons.arrow_forward_rounded,
+                        color: Colors.white, size: 22),
+                  ],
+                ),
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 14,
-              color: Color(0xFF4A90E2),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ── باقي الكلاسات زي ما هي بدون تغيير ───────────────────
+// ── Dropdown Field ────────────────────────────────────────────────
+class _DropdownField extends StatelessWidget {
+  final String label;
+  final String value;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+  final IconData prefixIcon;
+  final Color? accentColor;
 
+  const _DropdownField({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    required this.prefixIcon,
+    this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = accentColor ?? AppColors.primary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF6A7282),
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+
+        // Dropdown container
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: DropdownButtonFormField<String>(
+            value: value,
+            onChanged: onChanged,
+            icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                color: Color(0xFF6A7282)),
+            isExpanded: true,
+            decoration: InputDecoration(
+              prefixIcon: Icon(prefixIcon, color: color, size: 20),
+              filled: false,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 16),
+            ),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF111827),
+            ),
+            dropdownColor: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            items: items
+                .map(
+                  (item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(
+                  item,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+              ),
+            )
+                .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Blue Header ───────────────────────────────────────────────────
 class _BlueHeader extends StatelessWidget {
   const _BlueHeader();
 
@@ -378,262 +566,7 @@ class _BlueHeader extends StatelessWidget {
   }
 }
 
-class _SearchCard extends StatelessWidget {
-  final TextEditingController fromController;
-  final String? selectedDestination;
-  final VoidCallback onTapTo;
-
-  const _SearchCard({
-    required this.fromController,
-    required this.selectedDestination,
-    required this.onTapTo,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 40,
-            offset: const Offset(0, 20),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 4),
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  border: Border.all(color: AppColors.primary, width: 3),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'FROM',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.textMuted,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: fromController,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textMuted,
-                            ),
-                            decoration: const InputDecoration(
-                              filled: false,
-                              isDense: true,
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFFEFF6FF),
-                          ),
-                          child: const Icon(
-                            Icons.search,
-                            size: 16,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 13),
-            child: Row(
-              children: [
-                _DottedLine(),
-                const Expanded(child: SizedBox()),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 2),
-                child: Icon(
-                  Icons.location_on_outlined,
-                  color: AppColors.primary,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: GestureDetector(
-                  onTap: onTapTo,
-                  behavior: HitTestBehavior.opaque,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'TO',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.textMuted,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        selectedDestination ?? 'Search destination',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: selectedDestination != null
-                              ? AppColors.textPrimary
-                              : AppColors.textPlaceholder,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DottedLine extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 2,
-      height: 32,
-      child: CustomPaint(painter: _DottedLinePainter()),
-    );
-  }
-}
-
-class _DottedLinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFE5E7EB)
-      ..strokeWidth = 2;
-    const dashHeight = 4.0;
-    const gap = 3.0;
-    double y = 0;
-    while (y < size.height) {
-      canvas.drawLine(
-        Offset(size.width / 2, y),
-        Offset(size.width / 2, y + dashHeight),
-        paint,
-      );
-      y += dashHeight + gap;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _GetRoutesButton extends StatelessWidget {
-  final bool enabled;
-  final VoidCallback onPressed;
-
-  const _GetRoutesButton({required this.enabled, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 64,
-      child: ElevatedButton(
-        onPressed: enabled ? onPressed : null,
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          backgroundColor: AppColors.primary,
-          disabledBackgroundColor: Colors.grey.shade300,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-        ),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: enabled
-                ? const LinearGradient(
-              colors: [Color(0xFF4A90E2), Color(0xFF2563EB)],
-            )
-                : null,
-          ),
-          child: Container(
-            alignment: Alignment.center,
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Get Routes',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Icon(Icons.arrow_forward, color: Colors.white, size: 24),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
+// ── Zone Card ─────────────────────────────────────────────────────
 class _ZoneCard extends StatelessWidget {
   final String label;
   final String emoji;
@@ -693,6 +626,7 @@ class _ZoneCard extends StatelessWidget {
   }
 }
 
+// ── Destination Sheet ─────────────────────────────────────────────
 class _DestinationSheet extends StatelessWidget {
   final String title;
   final String? subtitle;

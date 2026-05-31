@@ -77,8 +77,8 @@ class _BanHopsAppState extends State<BanHopsApp>
       title: 'BanHops',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      darkTheme: AppTheme.light, // ✅ يمنع dark mode من يأثر على الشاشات
-      themeMode: ThemeMode.light, // ✅ دايماً light theme للتطبيق كله
+      darkTheme: AppTheme.light,
+      themeMode: ThemeMode.light,
       locale: _locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -137,8 +137,12 @@ class _MainShell extends StatefulWidget {
 
 class _MainShellState extends State<_MainShell> {
   NavTab _tab = NavTab.home;
-
   final List<TripHistoryItem> _tripHistory = [];
+
+  // ✅ Chat context — بيتحدث لما المستخدم يجي من RouteDetailsScreen
+  String? _chatFrom;
+  String? _chatTo;
+  String? _chatRouteType;
 
   void _addTrip(String from, String to, String line) {
     setState(() {
@@ -163,37 +167,23 @@ class _MainShellState extends State<_MainShell> {
             onNavigate: (t) => setState(() => _tab = t),
             onShowRouteDetails: (from, to) {
               _addTrip(from, to, 'Line 1');
-
-              // ✅ PageRouteBuilder عشان اللون الداكن للـ RouteDetailsScreen
-              // ميتسربش للـ HomeScreen أو أي شاشة تانية
               Navigator.of(ctx).push(
-                PageRouteBuilder(
-                  opaque: true,
-                  pageBuilder: (_, __, ___) => RouteDetailsScreen(
+                MaterialPageRoute(
+                  builder: (_) => RouteDetailsScreen(
                     from: from,
                     to: to,
                     onBack: () => Navigator.of(ctx).pop(),
-                    onOpenChat: () {
+                    // ✅ بيستقبل routeType من الكارت المختار
+                    onOpenChat: (chatFrom, chatTo, routeType) {
                       Navigator.of(ctx).pop();
-                      setState(() => _tab = NavTab.chat);
+                      setState(() {
+                        _chatFrom = chatFrom;
+                        _chatTo = chatTo;
+                        _chatRouteType = routeType;
+                        _tab = NavTab.chat;
+                      });
                     },
                   ),
-                  // ✅ Slide من تحت لفوق — أحلى من الـ default fade
-                  transitionsBuilder:
-                      (_, animation, __, child) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 1),
-                        end: Offset.zero,
-                      )
-                          .chain(CurveTween(curve: Curves.easeOutCubic))
-                          .animate(animation),
-                      child: child,
-                    );
-                  },
-                  transitionDuration: const Duration(milliseconds: 400),
-                  reverseTransitionDuration:
-                  const Duration(milliseconds: 300),
                 ),
               );
             },
@@ -207,7 +197,18 @@ class _MainShellState extends State<_MainShell> {
 
       case NavTab.chat:
         return ChatScreen(
-          onNavigate: (t) => setState(() => _tab = t),
+          onNavigate: (t) {
+            // ✅ لما يسافر من الشات لأي تاب تاني، نمسح الـ context
+            setState(() {
+              _chatFrom = null;
+              _chatTo = null;
+              _chatRouteType = null;
+              _tab = t;
+            });
+          },
+          from: _chatFrom,
+          to: _chatTo,
+          routeType: _chatRouteType,
         );
 
       case NavTab.history:
