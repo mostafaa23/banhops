@@ -30,15 +30,39 @@ class SignupService {
       }),
     );
 
-    print("STATUS CODE: ${response.statusCode}");
-    print("RESPONSE: ${response.body}");
+    // طباعة حيوية لمراقبة الحالة في الـ Debug Console
+    print("📌 HTTP STATUS CODE: ${response.statusCode}");
+    print("📌 SERVER RESPONSE BODY: ${response.body}");
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body);
+      try {
+        return jsonDecode(response.body);
+      } catch (_) {
+        return response.body;
+      }
     } else {
-      throw Exception(
-        'Signup Failed: ${response.statusCode} ${response.body}',
-      );
+      String errorMessage = 'Signup Failed';
+      try {
+        final responseBody = jsonDecode(response.body);
+        String rawMessage = responseBody['message'] ?? responseBody['error'] ?? errorMessage;
+
+        // لو الرسالة فيها "interpolatedMessage" نطلع الجزء المهم بس
+        if (rawMessage.contains("interpolatedMessage='")) {
+          final regex = RegExp(r"interpolatedMessage='([^']+)'");
+          final match = regex.firstMatch(rawMessage);
+          errorMessage = match?.group(1) ?? errorMessage;
+        } else {
+          errorMessage = rawMessage;
+        }
+      } catch (_) {
+        // Handle HTML or non-JSON responses
+        if (response.body.contains('<title>')) {
+          errorMessage = 'Server Error: ${response.statusCode}';
+        } else if (response.body.isNotEmpty) {
+          errorMessage = response.body;
+        }
+      }
+      throw Exception(errorMessage);
     }
   }
 }

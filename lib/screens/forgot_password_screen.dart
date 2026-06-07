@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../services/forgot_password_service.dart';
 import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
-enum _Step { credentials, verification, newPassword }
+enum _Step { credentials, showPassword }
 
 class ForgotPasswordScreen extends StatefulWidget {
   final VoidCallback onBack;
@@ -23,64 +24,44 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   _Step _step = _Step.credentials;
 
   final _credentialsKey = GlobalKey<FormState>();
-  final _passwordKey = GlobalKey<FormState>();
 
-  final _phone = TextEditingController();
+  // Text controllers for username and email
+  final _username = TextEditingController();
   final _email = TextEditingController();
-  final _newPass = TextEditingController();
-  final _confirmPass = TextEditingController();
 
-  final List<TextEditingController> _codeCtrls =
-      List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _codeNodes = List.generate(6, (_) => FocusNode());
-
-  bool _obscureNew = true;
-  bool _obscureConfirm = true;
+  // Field variable to store the retrieved password
+  String _recoveredPassword = '';
 
   @override
   void dispose() {
-    _phone.dispose();
+    _username.dispose();
     _email.dispose();
-    _newPass.dispose();
-    _confirmPass.dispose();
-    for (final c in _codeCtrls) {
-      c.dispose();
-    }
-    for (final n in _codeNodes) {
-      n.dispose();
-    }
     super.dispose();
   }
 
   String _title(AppLocalizations l10n) {
     switch (_step) {
       case _Step.credentials:
-        return l10n.forgotPassword;
-      case _Step.verification:
-        return l10n.verifyCode;
-      case _Step.newPassword:
-        return l10n.newPassword;
+        return 'Forgot Password';
+      case _Step.showPassword:
+        return 'Password Recovery';
     }
   }
 
   String _description(AppLocalizations l10n) {
     switch (_step) {
       case _Step.credentials:
-        return l10n.forgotPasswordStep1Desc;
-      case _Step.verification:
-        return l10n.forgotPasswordStep2Desc;
-      case _Step.newPassword:
-        return l10n.forgotPasswordStep3Desc;
+        return 'Enter your registered username and email address';
+      case _Step.showPassword:
+        return 'Your recovered password is:';
     }
   }
 
   void _handleBack() {
     if (_step == _Step.credentials) {
       widget.onBack();
-    } else if (_step == _Step.verification) {
-      setState(() => _step = _Step.credentials);
     } else {
-      setState(() => _step = _Step.verification);
+      setState(() => _step = _Step.credentials);
     }
   }
 
@@ -90,34 +71,30 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   String? _validateEmail(String? v, AppLocalizations l10n) {
-    final base = _required(v, l10n.emailRequired);
-    if (base != null) return base;
+    if (v == null || v.trim().isEmpty) return 'Email is required';
     final r = RegExp(r'^[\w.\-]+@[\w\-]+\.[\w.\-]+$');
-    if (!r.hasMatch(v!.trim())) return l10n.invalidEmail;
+    if (!r.hasMatch(v.trim())) return 'Invalid email address';
     return null;
   }
 
-  void _submitCredentials() {
-    if (_credentialsKey.currentState?.validate() ?? false) {
-      setState(() => _step = _Step.verification);
-    }
-  }
-
-  void _verifyCode(AppLocalizations l10n) {
-    final code = _codeCtrls.map((c) => c.text).join();
-    if (code.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.completeSixDigitCode)),
+  Future<void> _submitCredentials() async {
+    if (!(_credentialsKey.currentState?.validate() ?? false)) return;
+    try {
+      final password = await ForgotPasswordService.recoverPassword(
+        username: _username.text.trim(),
+        email:    _email.text.trim(),
       );
-      return;
+      if (!mounted) return;
+      setState(() {
+        _recoveredPassword = password;
+        _step = _Step.showPassword;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+      );
     }
-    setState(() => _step = _Step.newPassword);
-  }
-
-  void _resetPassword() {
-    if (!(_passwordKey.currentState?.validate() ?? false)) return;
-    if (_newPass.text != _confirmPass.text) return;
-    widget.onResetSuccess();
   }
 
   @override
@@ -207,9 +184,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 28),
         switch (_step) {
-          _Step.credentials => _buildCredentials(l10n),
-          _Step.verification => _buildVerification(l10n),
-          _Step.newPassword => _buildNewPassword(l10n),
+          _Step.credentials  => _buildCredentials(l10n),
+          _Step.showPassword => _buildShowPassword(),
         },
       ],
     );
@@ -220,179 +196,73 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       key: _credentialsKey,
       child: Column(
         children: [
+          // Username Input Field
           _LabeledField(
-            label: l10n.phoneNumber.toUpperCase(),
-            hint: '01xxxxxxxxx',
-            controller: _phone,
-            keyboardType: TextInputType.phone,
-            validator: (v) => _required(v, l10n.phoneRequired),
+            label: 'USERNAME',
+            hint: 'Enter your username',
+            controller: _username,
+            keyboardType: TextInputType.text,
+            validator: (v) => _required(v, 'Username is required'),
           ),
           const SizedBox(height: 16),
+
+          // Email Input Field
           _LabeledField(
-            label: l10n.email.toUpperCase(),
-            hint: l10n.emailHint,
+            label: 'EMAIL ADDRESS',
+            hint: 'Enter your email',
             controller: _email,
             keyboardType: TextInputType.emailAddress,
             validator: (v) => _validateEmail(v, l10n),
           ),
           const SizedBox(height: 32),
-          _PrimaryButton(label: l10n.send, onPressed: _submitCredentials),
+          _PrimaryButton(label: 'SUBMIT', onPressed: _submitCredentials),
         ],
       ),
     );
   }
 
-  Widget _buildVerification(AppLocalizations l10n) {
+  Widget _buildShowPassword() {
     return Column(
       children: [
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(6, (i) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: SizedBox(
-                  width: 48,
-                  height: 56,
-                  child: TextField(
-                    controller: _codeCtrls[i],
-                    focusNode: _codeNodes[i],
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    maxLength: 1,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: InputDecoration(
-                      counterText: '',
-                      filled: true,
-                      fillColor: const Color(0xFFF9FAFB),
-                      contentPadding: EdgeInsets.zero,
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFF3F4F6),
-                          width: 2,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    onChanged: (v) {
-                      if (v.isNotEmpty && i < 5) {
-                        _codeNodes[i + 1].requestFocus();
-                      } else if (v.isEmpty && i > 0) {
-                        _codeNodes[i - 1].requestFocus();
-                      }
-                    },
-                  ),
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0FDF4),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF86EFAC)),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.lock_open_rounded,
+                  color: Color(0xFF16A34A), size: 48),
+              const SizedBox(height: 16),
+              const Text(
+                'YOUR PASSWORD',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF15803D),
+                  fontWeight: FontWeight.w600,
                 ),
-              );
-            }),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _recoveredPassword,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF14532D),
+                  letterSpacing: 2,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 32),
-        _PrimaryButton(label: l10n.verify, onPressed: () => _verifyCode(l10n)),
-        const SizedBox(height: 16),
-        TextButton(
-          onPressed: () {
-            for (final c in _codeCtrls) {
-              c.clear();
-            }
-          },
-          child: Text(
-            l10n.resendCode,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        _PrimaryButton(
+          label: 'LOG IN',
+          onPressed: widget.onResetSuccess,
         ),
       ],
-    );
-  }
-
-  Widget _buildNewPassword(AppLocalizations l10n) {
-    final mismatch = _newPass.text.isNotEmpty &&
-        _confirmPass.text.isNotEmpty &&
-        _newPass.text != _confirmPass.text;
-
-    return Form(
-      key: _passwordKey,
-      child: Column(
-        children: [
-          _LabeledField(
-            label: l10n.newPassword.toUpperCase(),
-            hint: l10n.passwordHint,
-            controller: _newPass,
-            obscure: _obscureNew,
-            validator: (v) {
-              if (v == null || v.isEmpty) return l10n.passwordRequired;
-              if (v.length < 6) return l10n.passwordTooShort;
-              return null;
-            },
-            onChanged: (_) => setState(() {}),
-            suffix: IconButton(
-              icon: Icon(
-                _obscureNew
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                color: AppColors.textMuted,
-              ),
-              onPressed: () => setState(() => _obscureNew = !_obscureNew),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _LabeledField(
-            label: l10n.confirmPassword.toUpperCase(),
-            hint: l10n.passwordHint,
-            controller: _confirmPass,
-            obscure: _obscureConfirm,
-            validator: (v) {
-              if (v == null || v.isEmpty) return l10n.confirmPasswordRequired;
-              if (v != _newPass.text) return l10n.passwordsDoNotMatch;
-              return null;
-            },
-            onChanged: (_) => setState(() {}),
-            suffix: IconButton(
-              icon: Icon(
-                _obscureConfirm
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                color: AppColors.textMuted,
-              ),
-              onPressed: () =>
-                  setState(() => _obscureConfirm = !_obscureConfirm),
-            ),
-          ),
-          if (mismatch) ...[
-            const SizedBox(height: 12),
-            Text(
-              l10n.passwordsDoNotMatch,
-              style: const TextStyle(color: Colors.red, fontSize: 13),
-            ),
-          ],
-          const SizedBox(height: 24),
-          _PrimaryButton(
-            label: l10n.resetPassword,
-            onPressed: (_newPass.text.isNotEmpty &&
-                    _confirmPass.text.isNotEmpty &&
-                    !mismatch)
-                ? _resetPassword
-                : null,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -408,6 +278,7 @@ class _LabeledField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
 
   const _LabeledField({
+    super.key,
     required this.label,
     required this.hint,
     required this.controller,
@@ -490,7 +361,7 @@ class _PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF212121),
           foregroundColor: Colors.white,
-          disabledBackgroundColor: const Color(0xFF212121).withValues(alpha: 0.5),
+          disabledBackgroundColor: const Color(0xFF212121).withAlpha(128),
           disabledForegroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -514,7 +385,7 @@ class _CircleIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.2),
+      color: Colors.white.withAlpha(51),
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),

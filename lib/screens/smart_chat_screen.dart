@@ -119,6 +119,7 @@ ${widget.timeMin}-${widget.timeMax}
 
       if (!mounted) return;
       setState(() {
+        _messages.clear(); // امسح الـ intro القديمة الأول
         _messages.addAll(loaded);
       });
 
@@ -160,8 +161,8 @@ ${widget.timeMin}-${widget.timeMax}
     if (ok == true) {
       if (!mounted) return;
 
-      // ✅ تعديل هنا: تم إزالة استدعاء دالة الـ Service تماماً بناءً على طلبك
-      // تصفير واجهة الشات فقط أمام اليوزر وإعادة بناء الرسالة الترحيبية من جديد
+      await ChatPersistenceService.clearChat(_username);
+
       setState(() {
         _messages.clear();
         _isIntroAdded = false;
@@ -188,7 +189,7 @@ ${widget.timeMin}-${widget.timeMax}
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _addIntroMessage();
+    // مش هنضيف intro هنا خالص
   }
 
   @override

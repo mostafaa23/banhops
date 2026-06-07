@@ -17,8 +17,8 @@ class LoginService {
         "Content-Type": "application/json",
       },
       body: jsonEncode({
-        "username": username,
-        "password": password,
+        "username": username.trim(), // ✅ تنظيف اسم المستخدم من أي مسافات زائدة
+        "password": password,        // الباسورد يرسل كما هو بدون trim لضمان قبول الرموز والمسافات المقصودة
       }),
     );
 
@@ -28,8 +28,26 @@ class LoginService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['message'] ?? 'Login failed');
+      String errorMessage = 'Login failed';
+      try {
+        final errorData = jsonDecode(response.body);
+        String rawMessage = errorData['message'] ?? errorData['error'] ?? errorMessage;
+
+        if (rawMessage.contains("interpolatedMessage='")) {
+          final regex = RegExp(r"interpolatedMessage='([^']+)'");
+          final match = regex.firstMatch(rawMessage);
+          errorMessage = match?.group(1) ?? errorMessage;
+        } else {
+          errorMessage = rawMessage;
+        }
+      } catch (_) {
+        if (response.body.contains('<title>')) {
+          errorMessage = 'Server Error: ${response.statusCode}';
+        } else if (response.body.isNotEmpty) {
+          errorMessage = response.body;
+        }
+      }
+      throw Exception(errorMessage);
     }
   }
 }

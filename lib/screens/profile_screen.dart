@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../services/user_session.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final ValueChanged<NavTab> onNavigate;
   final VoidCallback onOpenLanguageSettings;
   final String userName;
@@ -17,6 +18,28 @@ class ProfileScreen extends StatelessWidget {
     this.userName = 'BanHops User',
     this.tripCount = 0,
   });
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  int _localTripCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocalTripCount();
+  }
+
+  Future<void> _loadLocalTripCount() async {
+    final count = await UserSession.getTripCount();
+    if (mounted) {
+      setState(() {
+        _localTripCount = count;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +135,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            userName,
+                            widget.userName,
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w900,
@@ -136,7 +159,7 @@ class ProfileScreen extends StatelessWidget {
                               height: 1,
                             ),
                           ),
-                          _TripCountCard(tripCount: tripCount),
+                          _TripCountCard(tripCount: _localTripCount),
                         ],
                       ),
                     ),
@@ -153,8 +176,8 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     _LanguageCard(
-                      onTap: onOpenLanguageSettings,
-                      locale: locale,
+                      onTap: widget.onOpenLanguageSettings,
+                      locale: widget.locale,
                     ),
                     const SizedBox(height: 16),
                     const _BrandingCard(),
@@ -168,7 +191,7 @@ class ProfileScreen extends StatelessWidget {
               bottom: 0,
               child: BottomNavBar(
                 active: NavTab.profile,
-                onTap: onNavigate,
+                onTap: widget.onNavigate,
               ),
             ),
           ],

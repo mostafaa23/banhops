@@ -31,6 +31,7 @@ class _SignInScreenState extends State<SignInScreen>
   late final Animation<Offset> _slide;
 
   bool _obscurePassword = true;
+  bool _isLoading = false; // ✅ إضافة متغير حالة التحميل لمنع التكرار
 
   @override
   void initState() {
@@ -55,31 +56,37 @@ class _SignInScreenState extends State<SignInScreen>
     super.dispose();
   }
 
+  // ── دوال التحقق المحدثة بالتوافق مع قيود الـ Backend ───────────────────────
   String? _validateUsername(String? value, AppLocalizations l10n) {
     if (value == null || value.trim().isEmpty) return l10n.usernameRequired;
+    if (value.trim().length < 4) return "اسم المستخدم يجب ألا يقل عن 4 أحرف";
     return null;
   }
 
   String? _validatePassword(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) return l10n.passwordRequired;
+    if (value.length < 8) return "كلمة المرور يجب ألا تقل عن 8 أحرف";
     return null;
   }
 
+  // ── دالة تسجيل الدخول الآمنة ──────────────────────────────────────────
   void _handleSignIn() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    setState(() => _isLoading = true); // تشغيل مؤشر التحميل
 
     try {
       final result = await LoginService.login(
         username: _usernameCtrl.text.trim(),
-        password: _passwordCtrl.text.trim(),
+        password: _passwordCtrl.text, // بنبعتها كـ plain text والـ Backend بيطابقها بالهاش
       );
 
       print("LOGIN SUCCESS: $result");
 
-      // ✅ احفظ الـ session
+      // ✅ حفظ الـ session محلياً
       await UserSession.save(
         username: result['username'],
-        firstName: result['firstName'],
+        firstName: result['firstName'] ?? '',
       );
 
       if (!mounted) return;
@@ -87,9 +94,17 @@ class _SignInScreenState extends State<SignInScreen>
 
     } catch (e) {
       if (!mounted) return;
+
+      // تنظيف الرسالة وعرضها بلون أحمر تحذيري شيك
+      String errorMsg = e.toString().replaceAll('Exception: ', '');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(
+          content: Text(errorMsg),
+          backgroundColor: Colors.redAccent,
+        ),
       );
+    } finally {
+      if (mounted) setState(() => _isLoading = false); // إيقاف مؤشر التحميل
     }
   }
 
@@ -175,11 +190,11 @@ class _SignInScreenState extends State<SignInScreen>
 
                         const SizedBox(height: 24),
 
-                        // Sign In Button
+                        // Sign In Button — ✅ معطل أثناء التحميل ويظهر الـ Indicator
                         SizedBox(
                           height: 56,
                           child: ElevatedButton(
-                            onPressed: _handleSignIn,
+                            onPressed: _isLoading ? null : _handleSignIn,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               foregroundColor: Colors.white,
@@ -188,7 +203,16 @@ class _SignInScreenState extends State<SignInScreen>
                               ),
                               elevation: 4,
                             ),
-                            child: Text(
+                            child: _isLoading
+                                ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                                : Text(
                               l10n.signIn,
                               style: const TextStyle(
                                 fontSize: 17,
@@ -294,6 +318,11 @@ class _SignInScreenState extends State<SignInScreen>
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: Colors.red, width: 1.5),
             ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Colors.red, width: 1.5),
+            ),
+            errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
           ),
         ),
       ],

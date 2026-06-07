@@ -156,6 +156,9 @@ class _MainShellState extends State<_MainShell> {
   Future<void> _loadTripsFromApi(String username) async {
     try {
       final trips = await TripHistoryService.getHistory(username);
+      // حفظ العدد في الـ session
+      await UserSession.saveTripCount(trips.length);
+
       setState(() {
         _tripHistory.clear();
         for (final t in trips) {

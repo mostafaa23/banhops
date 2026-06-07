@@ -31,21 +31,21 @@ const Map<String, List<String>> _governorateData = {
 };
 
 const Map<String, String> _benhaPlacesMaps = {
-  'Benha Main Bus Terminal': 'https://maps.app.goo.gl/3QW9GvDNPdfU7fD49',
-  'Benha Train Station': 'https://maps.app.goo.gl/VffG7Fv5XF6nFp2t7',
-  'Wabour El Thalg (Internal Terminal)': 'https://maps.app.goo.gl/yMh8rXqF5vK7A8NCA',
-  'El Eshara Square': 'https://maps.app.goo.gl/5e8SveE8QcKGe5qA8',
-  'El Mansheya Tunnel': 'https://maps.app.goo.gl/Lz9fD5Hq6u5L76u76',
-  'Saad Zaghloul Square': 'https://maps.app.goo.gl/Z9w2N7R9XpGvD3vV7',
-  'El Fellal (Corniche)': 'https://maps.app.goo.gl/nNfM4a9Ua5GZ7XU99',
-  'El Mansheya (Commerce Faculty Street)': 'https://maps.app.goo.gl/m7bDXb7Jb5B4e8X7A',
-  'Manshiyet El Noar': 'https://maps.app.goo.gl/4N8pD3uUu5C7X8N6A',
-  'Kafr Manaqer': 'https://maps.app.goo.gl/f8X7eD3Uu5M4X8P7A',
-  'New Mansheya (El Khalwa)': 'https://maps.app.goo.gl/7M8pD3uUu5C7X8M7A',
-  'Kafr El Gazzar': 'https://maps.app.goo.gl/4N9pD3uUu5C7X8M7A',
-  'El Ahram Street': 'https://maps.app.goo.gl/8M8pD3uUu5C7X8P7A',
-  'Benha University': 'https://maps.google.com/?q=Benha+University',
-  'Benha University Hospital': 'https://maps.google.com/?q=Benha+University+Hospital',
+  'Benha Main Bus Terminal': 'https://www.google.com/maps/search/?api=1&query=Benha+Main+Bus+Terminal',
+  'Benha Train Station': 'https://www.google.com/maps/search/?api=1&query=Benha+Train+Station',
+  'Wabour El Thalg (Internal Terminal)': 'https://www.google.com/maps/search/?api=1&query=Wabour+El+Thalg+Benha',
+  'El Eshara Square': 'https://www.google.com/maps/search/?api=1&query=El+Eshara+Square+Benha',
+  'El Mansheya Tunnel': 'https://www.google.com/maps/search/?api=1&query=El+Mansheya+Tunnel+Benha',
+  'Saad Zaghloul Square': 'https://www.google.com/maps/search/?api=1&query=Saad+Zaghloul+Square+Benha',
+  'El Fellal (Corniche)': 'https://www.google.com/maps/search/?api=1&query=El+Fellal+Corniche+Benha',
+  'El Mansheya (Commerce Faculty Street)': 'https://www.google.com/maps/search/?api=1&query=Faculty+of+Commerce+Benha+University',
+  'Manshiyet El Noar': 'https://www.google.com/maps/search/?api=1&query=Manshiyet+El+Noar+Benha',
+  'Kafr Manaqer': 'https://www.google.com/maps/search/?api=1&query=Kafr+Manaqer+Benha',
+  'New Mansheya (El Khalwa)': 'https://www.google.com/maps/search/?api=1&query=New+Mansheya+Benha',
+  'Kafr El Gazzar': 'https://www.google.com/maps/search/?api=1&query=Kafr+El+Gazzar+Benha',
+  'El Ahram Street': 'https://www.google.com/maps/search/?api=1&query=El+Ahram+Street+Benha',
+  'Benha University': 'https://www.google.com/maps/search/?api=1&query=Benha+University',
+  'Benha University Hospital': 'https://www.google.com/maps/search/?api=1&query=Benha+University+Hospital',
 };
 
 final List<String> _benhaPlaces = _benhaPlacesMaps.keys.toList();

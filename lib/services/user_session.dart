@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserSession {
   static const _keyUsername = 'username';
   static const _keyFirstName = 'firstName';
+  static const _keyTripCount = 'tripCount';
 
   // حفظ بعد Login
   static Future<void> save({
@@ -12,6 +13,18 @@ class UserSession {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyUsername, username);
     await prefs.setString(_keyFirstName, firstName);
+  }
+
+  // حفظ عدد الرحلات
+  static Future<void> saveTripCount(int count) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyTripCount, count);
+  }
+
+  // جيب عدد الرحلات
+  static Future<int> getTripCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyTripCount) ?? 0;
   }
 
   // جيب الـ username
