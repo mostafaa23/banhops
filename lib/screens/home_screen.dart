@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bottom_nav_bar.dart';
 
@@ -29,15 +30,25 @@ const Map<String, List<String>> _governorateData = {
   ],
 };
 
-const List<String> _benhaPlaces = [
-  'Benha Main Bus Terminal',
-  'Benha Train Station',
-  'Benha University',
-  'Benha University Hospital',
-  'El Mansheya',
-  'Wesst El Balad',
-  'El Fellah',
-];
+const Map<String, String> _benhaPlacesMaps = {
+  'Benha Main Bus Terminal': 'https://maps.app.goo.gl/3QW9GvDNPdfU7fD49',
+  'Benha Train Station': 'https://maps.app.goo.gl/VffG7Fv5XF6nFp2t7',
+  'Wabour El Thalg (Internal Terminal)': 'https://maps.app.goo.gl/yMh8rXqF5vK7A8NCA',
+  'El Eshara Square': 'https://maps.app.goo.gl/5e8SveE8QcKGe5qA8',
+  'El Mansheya Tunnel': 'https://maps.app.goo.gl/Lz9fD5Hq6u5L76u76',
+  'Saad Zaghloul Square': 'https://maps.app.goo.gl/Z9w2N7R9XpGvD3vV7',
+  'El Fellal (Corniche)': 'https://maps.app.goo.gl/nNfM4a9Ua5GZ7XU99',
+  'El Mansheya (Commerce Faculty Street)': 'https://maps.app.goo.gl/m7bDXb7Jb5B4e8X7A',
+  'Manshiyet El Noar': 'https://maps.app.goo.gl/4N8pD3uUu5C7X8N6A',
+  'Kafr Manaqer': 'https://maps.app.goo.gl/f8X7eD3Uu5M4X8P7A',
+  'New Mansheya (El Khalwa)': 'https://maps.app.goo.gl/7M8pD3uUu5C7X8M7A',
+  'Kafr El Gazzar': 'https://maps.app.goo.gl/4N9pD3uUu5C7X8M7A',
+  'El Ahram Street': 'https://maps.app.goo.gl/8M8pD3uUu5C7X8P7A',
+  'Benha University': 'https://maps.google.com/?q=Benha+University',
+  'Benha University Hospital': 'https://maps.google.com/?q=Benha+University+Hospital',
+};
+
+final List<String> _benhaPlaces = _benhaPlacesMaps.keys.toList();
 
 // ── HomeScreen ────────────────────────────────────────────────────
 
@@ -56,10 +67,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // ── Dropdown state ──────────────────────────────────────────────
   String _selectedGovernorate = 'Cairo';
   late String _selectedCity;
-  String _selectedBenhaPlace = _benhaPlaces.first;
+  String? _selectedBenhaPlace; // جعلناها قابلة للحذف (null) لتبدأ فارغة حتى يختار المستخدم
 
   @override
   void initState() {
@@ -76,48 +86,73 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleGetRoutes() {
+    if (_selectedBenhaPlace == null) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.pleaseSelectDestination)),
+      );
+      return;
+    }
     final from = '$_selectedCity, $_selectedGovernorate';
-    final to = _selectedBenhaPlace;
+    final to = _selectedBenhaPlace!;
     widget.onShowRouteDetails(from, to);
   }
 
-  // ── Colleges quick-pick (kept from old screen) ──────────────────
-  static const _colleges = [
-    'Faculty of Commerce',
-    'Faculty of Arts',
-    'Faculty of Education',
-    'Faculty of Specific Education',
-    'Faculty of Physical Education',
-    'Faculty of Law',
-    'Faculty of Applied Arts',
-  ];
+  void _openGoogleMaps() async {
+    if (_selectedBenhaPlace == null) return;
+    final urlString = _benhaPlacesMaps[_selectedBenhaPlace];
+    if (urlString != null) {
+      final Uri url = Uri.parse(urlString);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.couldNotLaunchMaps)),
+        );
+      }
+    }
+  }
 
   void _openCollegePicker() async {
+    final l10n = AppLocalizations.of(context)!;
+    final colleges = [
+      l10n.facultyOfCommerce,
+      l10n.facultyOfArts,
+      l10n.facultyOfEducation,
+      l10n.facultyOfSpecificEducation,
+      l10n.facultyOfPhysicalEducation,
+      l10n.facultyOfLaw,
+      l10n.facultyOfAppliedArts,
+    ];
+    
     final result = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (_) => _DestinationSheet(
-        title: 'Select College',
-        subtitle: 'Benha University Colleges',
-        items: _colleges,
+        title: l10n.selectCollege,
+        subtitle: l10n.benhaUniversityColleges,
+        items: colleges,
         accent: Colors.orange,
         icon: Icons.school_outlined,
       ),
     );
     if (result != null) {
-      setState(() => _selectedBenhaPlace = result);
+      setState(() => _selectedBenhaPlace = 'Benha University');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: AppColors.primary,
       extendBody: true,
       body: Column(
         children: [
-          const _BlueHeader(),
+          _BlueHeader(l10n: l10n),
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
@@ -131,9 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-
-                      // ── Plan Trip Card ─────────────────────────
                       _PlanTripCard(
+                        l10n: l10n,
                         selectedGovernorate: _selectedGovernorate,
                         selectedCity: _selectedCity,
                         selectedBenhaPlace: _selectedBenhaPlace,
@@ -146,14 +180,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (v != null) setState(() => _selectedBenhaPlace = v);
                         },
                         onGetRoutes: _handleGetRoutes,
+                        onMapPressed: _openGoogleMaps,
                       ),
 
                       const SizedBox(height: 32),
 
-                      // ── Popular Zones ──────────────────────────
-                      const Text(
-                        'Popular Zones',
-                        style: TextStyle(
+                      Text(
+                        l10n.popularZones,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
                           color: AppColors.textPrimary,
@@ -170,36 +204,33 @@ class _HomeScreenState extends State<HomeScreen> {
                         childAspectRatio: 1.1,
                         children: [
                           _ZoneCard(
-                            label: 'University',
+                            label: l10n.university,
                             emoji: '🎓',
                             bgColor: const Color(0xFFFFF7ED),
                             onTap: _openCollegePicker,
                           ),
                           _ZoneCard(
-                            label: 'Hospital',
+                            label: l10n.hospital,
                             emoji: '🏥',
                             bgColor: const Color(0xFFFEF2F2),
                             onTap: () {
-                              setState(() => _selectedBenhaPlace =
-                              'Benha University Hospital');
+                              setState(() => _selectedBenhaPlace = 'Benha University Hospital');
                             },
                           ),
                           _ZoneCard(
-                            label: 'Bus Terminal',
+                            label: l10n.busTerminal,
                             emoji: '🚌',
                             bgColor: const Color(0xFFF0FDF4),
                             onTap: () {
-                              setState(() => _selectedBenhaPlace =
-                              'Benha Main Bus Terminal');
+                              setState(() => _selectedBenhaPlace = 'Benha Main Bus Terminal');
                             },
                           ),
                           _ZoneCard(
-                            label: 'Train Station',
+                            label: l10n.trainStation,
                             emoji: '🚆',
                             bgColor: const Color(0xFFFFFBEB),
                             onTap: () {
-                              setState(() =>
-                              _selectedBenhaPlace = 'Benha Train Station');
+                              setState(() => _selectedBenhaPlace = 'Benha Train Station');
                             },
                           ),
                         ],
@@ -222,16 +253,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // ── Plan Trip Card ────────────────────────────────────────────────
 class _PlanTripCard extends StatelessWidget {
+  final AppLocalizations l10n;
   final String selectedGovernorate;
   final String selectedCity;
-  final String selectedBenhaPlace;
+  final String? selectedBenhaPlace;
   final List<String> cities;
   final ValueChanged<String?> onGovernorateChanged;
   final ValueChanged<String?> onCityChanged;
   final ValueChanged<String?> onBenhaPlaceChanged;
   final VoidCallback onGetRoutes;
+  final VoidCallback onMapPressed;
 
   const _PlanTripCard({
+    required this.l10n,
     required this.selectedGovernorate,
     required this.selectedCity,
     required this.selectedBenhaPlace,
@@ -240,10 +274,14 @@ class _PlanTripCard extends StatelessWidget {
     required this.onCityChanged,
     required this.onBenhaPlaceChanged,
     required this.onGetRoutes,
+    required this.onMapPressed,
   });
 
   @override
   Widget build(BuildContext context) {
+    // التحقق مما إذا كان المستخدم قد حدد مكاناً في بنها بالفعل
+    final bool hasSelection = selectedBenhaPlace != null;
+
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
@@ -260,8 +298,6 @@ class _PlanTripCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          // ── Title ──────────────────────────────────────
           Row(
             children: [
               Container(
@@ -278,9 +314,9 @@ class _PlanTripCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Plan Trip',
-                style: TextStyle(
+              Text(
+                l10n.planTrip,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF111827),
@@ -291,9 +327,8 @@ class _PlanTripCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // ── 1. Governorate ─────────────────────────────
           _DropdownField(
-            label: 'SELECT GOVERNORATE',
+            label: l10n.selectGovernorate,
             value: selectedGovernorate,
             items: _governorateData.keys.toList(),
             onChanged: onGovernorateChanged,
@@ -302,9 +337,8 @@ class _PlanTripCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ── 2. City ────────────────────────────────────
           _DropdownField(
-            label: 'SELECT CITY / AREA',
+            label: l10n.selectCityArea,
             value: selectedCity,
             items: cities,
             onChanged: onCityChanged,
@@ -313,21 +347,15 @@ class _PlanTripCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ── Divider with arrow ─────────────────────────
           Row(
             children: [
-              Expanded(
-                child: Container(
-                  height: 1,
-                  color: const Color(0xFFE5E7EB),
-                ),
-              ),
+              Expanded(child: Container(height: 1, color: const Color(0xFFE5E7EB))),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 12),
                 width: 32,
                 height: 32,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEFF6FF),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -336,30 +364,81 @@ class _PlanTripCard extends StatelessWidget {
                   size: 16,
                 ),
               ),
-              Expanded(
-                child: Container(
-                  height: 1,
-                  color: const Color(0xFFE5E7EB),
-                ),
-              ),
+              Expanded(child: Container(height: 1, color: const Color(0xFFE5E7EB))),
             ],
           ),
 
           const SizedBox(height: 16),
 
-          // ── 3. Benha Place ─────────────────────────────
+          // حقل بنها مع إضافة لوجو الخريطة الملون (Google Maps Pins Style) والتحكم في ظهوره
           _DropdownField(
-            label: 'WHERE IN BENHA?',
+            label: l10n.whereInBenha,
             value: selectedBenhaPlace,
+            hint: l10n.chooseDestination,
             items: _benhaPlaces,
             onChanged: onBenhaPlaceChanged,
             prefixIcon: Icons.place_outlined,
-            accentColor: const Color(0xFF059669), // green
+            accentColor: const Color(0xFF059669),
+            suffixWidget: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: hasSelection ? 1.0 : 0.0,
+              child: hasSelection
+                  ? Padding(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: GestureDetector(
+                  onTap: onMapPressed,
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    // بناء وتنسيق اللوجو ليكون شبيهاً تماماً بصورة download.png الملونة
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const Icon(Icons.location_on_rounded, color: Color(0xFF34A853), size: 30), // الجسم الأخضر الأساسي
+                        Positioned(
+                          top: 7,
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        // تلميحات ألوان الـ Pin العلوية (أزرق، أحمر، أصفر) لإضفاء المظهر الملون الفاخر
+                        const Positioned(
+                          top: 5,
+                          left: 10,
+                          child: Icon(Icons.brightness_1, color: Color(0xFFEA4335), size: 8),
+                        ),
+                        const Positioned(
+                          top: 5,
+                          right: 10,
+                          child: Icon(Icons.brightness_1, color: Color(0xFF4285F4), size: 8),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+                  : const SizedBox.shrink(),
+            ),
           ),
 
           const SizedBox(height: 24),
 
-          // ── Get Routes Button ──────────────────────────
           SizedBox(
             width: double.infinity,
             child: GestureDetector(
@@ -383,19 +462,18 @@ class _PlanTripCard extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text(
-                      'Get Routes',
-                      style: TextStyle(
+                      l10n.getRoutes,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
                         letterSpacing: -0.2,
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Icon(Icons.arrow_forward_rounded,
-                        color: Colors.white, size: 22),
+                    const SizedBox(width: 10),
+                    const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 22),
                   ],
                 ),
               ),
@@ -410,19 +488,23 @@ class _PlanTripCard extends StatelessWidget {
 // ── Dropdown Field ────────────────────────────────────────────────
 class _DropdownField extends StatelessWidget {
   final String label;
-  final String value;
+  final String? value;
+  final String? hint;
   final List<String> items;
   final ValueChanged<String?> onChanged;
   final IconData prefixIcon;
   final Color? accentColor;
+  final Widget? suffixWidget;
 
   const _DropdownField({
     required this.label,
-    required this.value,
+    this.value,
+    this.hint,
     required this.items,
     required this.onChanged,
     required this.prefixIcon,
     this.accentColor,
+    this.suffixWidget,
   });
 
   @override
@@ -432,7 +514,6 @@ class _DropdownField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
@@ -445,50 +526,54 @@ class _DropdownField extends StatelessWidget {
             ),
           ),
         ),
-
-        // Dropdown container
         Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF9FAFB),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFE5E7EB)),
           ),
-          child: DropdownButtonFormField<String>(
-            value: value,
-            onChanged: onChanged,
-            icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                color: Color(0xFF6A7282)),
-            isExpanded: true,
-            decoration: InputDecoration(
-              prefixIcon: Icon(prefixIcon, color: color, size: 20),
-              filled: false,
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 16),
-            ),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF111827),
-            ),
-            dropdownColor: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            items: items
-                .map(
-                  (item) => DropdownMenuItem<String>(
-                value: item,
-                child: Text(
-                  item,
+          child: Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: value,
+                  hint: hint != null ? Text(hint!, style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 15)) : null,
+                  onChanged: onChanged,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF6A7282)),
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(prefixIcon, color: color, size: 20),
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: Color(0xFF111827),
                   ),
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  items: items
+                      .map(
+                        (item) => DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(
+                        item,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                    ),
+                  )
+                      .toList(),
                 ),
               ),
-            )
-                .toList(),
+              if (suffixWidget != null) suffixWidget!,
+            ],
           ),
         ),
       ],
@@ -498,7 +583,9 @@ class _DropdownField extends StatelessWidget {
 
 // ── Blue Header ───────────────────────────────────────────────────
 class _BlueHeader extends StatelessWidget {
-  const _BlueHeader();
+  final AppLocalizations l10n;
+  
+  const _BlueHeader({required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -515,7 +602,7 @@ class _BlueHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome',
+                      l10n.welcome,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 14,
@@ -756,11 +843,7 @@ class _DestinationSheet extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const Icon(
-                              Icons.arrow_forward,
-                              size: 18,
-                              color: AppColors.textMuted,
-                            ),
+                            const Icon(Icons.arrow_forward, size: 18, color: AppColors.textMuted),
                           ],
                         ),
                       ),

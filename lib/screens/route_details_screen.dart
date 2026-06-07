@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
+import '../services/route_service.dart';
 
 class RouteOption {
   final int id;
@@ -32,7 +33,16 @@ class RouteDetailsScreen extends StatefulWidget {
   final String from;
   final String to;
   final VoidCallback onBack;
-  final void Function(String from, String to, String? routeType) onOpenChat;
+
+  final void Function({
+  required String from,
+  required String to,
+  String? transportMode,
+  String? costMin,
+  String? costMax,
+  String? timeMin,
+  String? timeMax,
+  }) onOpenChat;
 
   const RouteDetailsScreen({
     super.key,
@@ -48,40 +58,141 @@ class RouteDetailsScreen extends StatefulWidget {
 
 class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
   int? _selectedRouteId;
+  List<RouteOption> _options = [];
+  bool _isLoading = true; // 👈 علم لإدارة حالة الـ Loading بشكل أفضل
 
-  static const _options = [
-    RouteOption(
-      id: 1,
-      name: 'Direct Microbus (Moassasa)',
-      routeType: 'microbus',
-      time: '45–60 min',
-      cost: '15–20 EGP',
-      icon: Icons.directions_bus_rounded,
-      isBest: true,
-      description:
-      'From Moassasa station, you will find direct microbuses to Benha.',
-      pros: 'Direct, cheap, and available all day.',
-      cons: 'May be crowded during peak hours.',
-    ),
-    RouteOption(
-      id: 2,
-      name: 'Train (Nearby Station)',
-      routeType: 'train',
-      time: '50 min',
-      cost: '50–120 EGP',
-      icon: Icons.train_rounded,
-      isBest: false,
-      description:
-      'Take the train from Ramses or Shubra El-Kheima to Benha.',
-      pros: 'Comfortable and pleasant if you want to avoid crowds.',
-      cons: 'You need to reach the station first, which adds time.',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadRoutes();
+  }
 
-  String? get _selectedRouteType => _options
-      .where((o) => o.id == _selectedRouteId)
-      .map((o) => o.routeType)
-      .firstOrNull;
+  // ✅ الدالة المعدلة لتنفيذ الـ Fallback Mechanism ذكياً
+  Future<void> _loadRoutes() async {
+    try {
+      setState(() => _isLoading = true);
+
+      // ✅ نظّف الاسم قبل ما تبعته للـ API ليتوافق مع الـ DB العربي
+      final cleanFrom = _cleanStationName(widget.from);
+      final cleanTo = _cleanStationName(widget.to);
+
+      final routes = await RouteService.getRoute(
+        from: cleanFrom,
+        to: cleanTo,
+      );
+
+      // 🚨 خطة الطوارئ (Fallback Mechanism) لو الـ BFS ملاقاش مسار
+      if (routes.isEmpty) {
+        if (!mounted) return;
+
+        setState(() => _isLoading = false);
+
+        // 1. إظهار رسالة تنبيه ذكية للمستخدم
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.auto_awesome_rounded, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'عذراً، لم نجد مساراً مباشراً في قاعدة البيانات. جارٍ تحويلك للمساعد الذكي ليرشدك...',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF4A90E2), // لون الثيم الأساسي بتاعك
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+        );
+
+        // 2. الانتقال التلقائي لشاشة الشات بوت بعد ثانيتين
+        Future.delayed(const Duration(seconds: 2), () {
+          if (!mounted) return;
+          widget.onOpenChat(
+            from: widget.from,
+            to: widget.to,
+            transportMode: 'unknown', // بنعرف الـ AI إن الطريق مش متسيف في الـ DB
+            costMin: '0',
+            costMax: '0',
+            timeMin: '0',
+            timeMax: '0',
+          );
+        });
+        return;
+      }
+
+      // لو الداتا راجعة تمام وفرش الكروت عادي
+      setState(() {
+        _isLoading = false;
+        int counter = 1;
+        _options = routes.map((r) {
+          final isTrain = r.transportMode.toUpperCase() == "TRAIN";
+          return RouteOption(
+            id: counter++,
+            name: isTrain ? 'قطار' : 'ميكروباص',
+            routeType: r.transportMode.toLowerCase(),
+            time: "${r.timeMin}-${r.timeMax} min",
+            cost: "${r.costMin}-${r.costMax} EGP",
+            icon: isTrain ? Icons.train_rounded : Icons.directions_bus_rounded,
+            isBest: counter == 2,
+            description: "${r.fromStation} → ${r.toStation}",
+            pros: isTrain ? 'مريح وسريع' : 'رخيص ومتاح وسريع',
+            cons: isTrain ? 'يحتاج محطة' : 'ممكن يكون مزدحم في أوقات الذروة',
+          );
+        }).toList();
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      debugPrint("Error loading routes: $e");
+    }
+  }
+
+  // ✅ دالة تنظيف اسم المحطة وعمل Mapping من الإنجليزي للعربي المتوافق مع الـ Seeder
+  String _cleanStationName(String name) {
+    final Map<String, String> mapping = {
+      'Your current location': 'القاهرة',
+      'Shubra El Kheima, Qalyubia': 'شبرا الخيمة',
+      'Ahmed Helmy, Cairo': 'القاهرة',
+      'Smouha, Alexandria': 'الإسكندرية',
+      'Benha University': 'بنها',
+      'Faculty of Commerce': 'بنها',
+      'Faculty of Arts': 'بنها',
+      'Faculty of Education': 'بنها',
+      'Faculty of Specific Education': 'بنها',
+      'Faculty of Physical Education': 'بنها',
+      'Faculty of Law': 'بنها',
+      'Faculty of Applied Arts': 'بنها',
+      'el vell': 'بنها',
+      'mokf': 'بنها',
+      'west balad': 'بنها',
+      'el mansia': 'بنها',
+    };
+
+    for (var key in mapping.keys) {
+      if (name.toLowerCase().contains(key.toLowerCase())) {
+        return mapping[key]!;
+      }
+    }
+    return mapping[name] ?? name;
+  }
+
+  RouteOption get _effectiveOption {
+    final selected = _options.where((o) => o.id == _selectedRouteId).firstOrNull;
+    if (selected != null) return selected;
+
+    return _options.firstWhere((o) => o.isBest, orElse: () => _options.first);
+  }
+
+  String? get _selectedRouteType =>
+      _options.where((o) => o.id == _selectedRouteId).firstOrNull?.routeType;
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +202,7 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: Column(
         children: [
-          // ── Header ──────────────────────────────────────
           _Header(from: widget.from, to: widget.to, onBack: widget.onBack, l10n: l10n),
-
-          // ── Content ─────────────────────────────────────
           Expanded(
             child: Stack(
               children: [
@@ -103,7 +211,6 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Section label
                       Row(
                         children: [
                           Container(
@@ -126,9 +233,7 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
                           ),
                         ],
                       ),
-
-                      // Selection hint
-                      if (_selectedRouteId == null) ...[
+                      if (_selectedRouteId == null && _options.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Text(
                           'Tap a card to select your preferred route',
@@ -139,39 +244,81 @@ class _RouteDetailsScreenState extends State<RouteDetailsScreen> {
                           ),
                         ),
                       ],
-
                       const SizedBox(height: 16),
-
-                      // Route cards
-                      ..._options.map(
-                            (o) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _OptionCard(
-                            option: o,
-                            l10n: l10n,
-                            isSelected: _selectedRouteId == o.id,
-                            onTap: () => setState(() {
-                              _selectedRouteId =
-                              _selectedRouteId == o.id ? null : o.id;
-                            }),
+                      if (_isLoading)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 60),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      else if (_options.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 40),
+                            child: Text(
+                              'No regular routes found.',
+                              style: TextStyle(color: AppColors.textMuted),
+                            ),
+                          ),
+                        )
+                      else
+                        ..._options.map(
+                              (o) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _OptionCard(
+                              option: o,
+                              l10n: l10n,
+                              isSelected: _selectedRouteId == o.id,
+                              onTap: () => setState(() {
+                                _selectedRouteId =
+                                _selectedRouteId == o.id ? null : o.id;
+                              }),
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
-
-                // ── Floating Chat Button ─────────────────
                 Positioned(
                   left: 20,
                   right: 20,
                   bottom: 24,
-                  child: _ChatButton(
-                    onTap: () => widget.onOpenChat(
-                      widget.from,
-                      widget.to,
-                      _selectedRouteType,
-                    ),
+                  child: _options.isEmpty
+                      ? const SizedBox.shrink()
+                      : _ChatButton(
+                    onTap: () {
+                      final opt = _effectiveOption;
+                      String? costMin, costMax, timeMin, timeMax;
+
+                      final costParts = opt.cost.replaceAll(RegExp(r'[^0-9–]'), '').split('–');
+                      if (costParts.length == 2) {
+                        costMin = costParts[0];
+                        costMax = costParts[1];
+                      } else if (costParts.isNotEmpty) {
+                        costMin = costParts[0];
+                        costMax = costParts[0];
+                      }
+
+                      final timeParts = opt.time.replaceAll(RegExp(r'[^0-9–]'), '').split('–');
+                      if (timeParts.length == 2) {
+                        timeMin = timeParts[0];
+                        timeMax = timeParts[1];
+                      } else if (timeParts.isNotEmpty) {
+                        timeMin = timeParts[0];
+                        timeMax = timeParts[0];
+                      }
+
+                      widget.onOpenChat(
+                        from: widget.from,
+                        to: widget.to,
+                        transportMode: opt.routeType,
+                        costMin: costMin,
+                        costMax: costMax,
+                        timeMin: timeMin,
+                        timeMax: timeMax,
+                      );
+                    },
                     l10n: l10n,
                     selectedRouteType: _selectedRouteType,
                   ),
@@ -241,8 +388,7 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(999),
@@ -308,13 +454,11 @@ class _OptionCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFEFF6FF)   // blue-50
-              : Colors.white,
+          color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF2563EB)  // blue-700
+                ? const Color(0xFF2563EB)
                 : isBest
                 ? AppColors.primary.withValues(alpha: 0.40)
                 : const Color(0xFFF3F4F6),
@@ -347,7 +491,6 @@ class _OptionCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Best match tint
             if (isBest && !isSelected)
               Positioned.fill(
                 child: Container(
@@ -364,20 +507,15 @@ class _OptionCard extends StatelessWidget {
                   ),
                 ),
               ),
-
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top spacing for badge
                   if (isBest) const SizedBox(height: 10),
-
-                  // ── Icon + Name + Chips ─────────────────
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Icon
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         width: 52,
@@ -404,15 +542,11 @@ class _OptionCard extends StatelessWidget {
                         ),
                         child: Icon(
                           option.icon,
-                          color: (isBest || isSelected)
-                              ? Colors.white
-                              : AppColors.textSecondary,
+                          color: (isBest || isSelected) ? Colors.white : AppColors.textSecondary,
                           size: 24,
                         ),
                       ),
-
                       const SizedBox(width: 14),
-
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -447,8 +581,6 @@ class _OptionCard extends StatelessWidget {
                           ],
                         ),
                       ),
-
-                      // Selected checkmark
                       if (isSelected)
                         Container(
                           width: 28,
@@ -465,54 +597,46 @@ class _OptionCard extends StatelessWidget {
                         ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
                   const Divider(height: 1, color: Color(0xFFF3F4F6)),
                   const SizedBox(height: 14),
-
-                  // Description
-                  Text(
-                    option.description,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontStyle: FontStyle.italic,
-                      color: AppColors.textSecondary,
-                      height: 1.6,
+                  if (option.description.isNotEmpty) ...[
+                    Text(
+                      option.description,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Pros
-                  _ProsConsRow(
-                    icon: Icons.check_circle_outline_rounded,
-                    label: option.pros,
-                    isPositive: true,
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Cons
-                  _ProsConsRow(
-                    icon: Icons.cancel_outlined,
-                    label: option.cons,
-                    isPositive: false,
-                  ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (option.pros.isNotEmpty) ...[
+                    _ProsConsRow(
+                      icon: Icons.check_circle_outline_rounded,
+                      label: option.pros,
+                      isPositive: true,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (option.cons.isNotEmpty)
+                    _ProsConsRow(
+                      icon: Icons.cancel_outlined,
+                      label: option.cons,
+                      isPositive: false,
+                    ),
                 ],
               ),
             ),
-
-            // Best Match Badge
             if (isBest)
               Positioned(
                 top: 0,
                 right: 20,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFF2563EB)
-                        : AppColors.primary,
+                    color: isSelected ? const Color(0xFF2563EB) : AppColors.primary,
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(10),
                       bottomRight: Radius.circular(10),
@@ -521,8 +645,7 @@ class _OptionCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.bolt_rounded,
-                          color: Colors.white, size: 13),
+                      const Icon(Icons.bolt_rounded, color: Colors.white, size: 13),
                       const SizedBox(width: 4),
                       Text(
                         l10n.bestMatch.toUpperCase(),
@@ -599,10 +722,8 @@ class _ProsConsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-    isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626);
-    final bgColor =
-    isPositive ? const Color(0xFFF0FDF4) : const Color(0xFFFFF1F2);
+    final color = isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626);
+    final bgColor = isPositive ? const Color(0xFFF0FDF4) : const Color(0xFFFFF1F2);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -712,10 +833,7 @@ class _ChatButtonState extends State<_ChatButton> {
                     ),
                   ),
                   Text(
-                    // ✅ hint تتغير حسب لو اتختار مسار
-                    hasRoute
-                        ? 'Get your step-by-step itinerary'
-                        : widget.l10n.readyToHelp,
+                    hasRoute ? 'Get your step-by-step itinerary' : widget.l10n.readyToHelp,
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white.withValues(alpha: 0.70),

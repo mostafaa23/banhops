@@ -21,8 +21,9 @@ flutter run
 ## Progress
 
 - [x] `main.dart` + theme + LoadingScreen
-- [ ] LanguageSelection
-- [ ] SignIn / SignUp / ForgotPassword
-- [ ] Home / RouteDetails
-- [ ] TrainLines / History / Profile / LanguageSettings
-- [ ] Chat
+- [x] LanguageSelection
+- [x] SignIn / SignUp / ForgotPassword
+- [x] Home / RouteDetails
+- [x] TrainLines (6 major train routes with interactive map)
+- [x] History / Profile / LanguageSettings
+- [x] Chat

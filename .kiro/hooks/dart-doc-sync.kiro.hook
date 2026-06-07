@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Dart Documentation Sync",
+  "description": "Automatically updates README.md or documentation files when Dart source files are modified to keep documentation in sync with code changes",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.dart",
+      "*.yaml",
+      "*.arb"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review the changes made to the source files and update the relevant documentation in README.md or the .kiro/steering/ documentation files to reflect any new features, API changes, or architectural updates. Keep documentation concise and accurate."
+  }
+}

@@ -60,6 +60,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneRequired => 'Phone number is required';
 
   @override
+  String get invalidPhoneNumber => 'Enter a valid phone number';
+
+  @override
+  String get phoneNumberPlaceholder => '+20 1XX XXX XXXX';
+
+  @override
+  String get accountCreatedSuccessfully => 'Account created successfully';
+
+  @override
   String get forgotPasswordStep1Desc =>
       'Enter your phone number and email to receive a verification code.';
 
@@ -245,10 +254,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainMap => 'Train Map';
 
   @override
-  String get tapToZoom => 'Tap to zoom';
+  String get tapToZoom => 'Tap to Zoom';
 
   @override
-  String get chooseYourRoute => 'Choose your route';
+  String get chooseYourRoute => 'Choose Your Route';
 
   @override
   String startingFrom(Object city) {
@@ -312,4 +321,101 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aiResponse5 =>
       'I can book a taxi for you if you prefer total comfort.';
+
+  @override
+  String get pleaseSelectDestination =>
+      'Please select your destination in Benha first!';
+
+  @override
+  String get couldNotLaunchMaps => 'Could not launch Google Maps';
+
+  @override
+  String get facultyOfCommerce => 'Faculty of Commerce';
+
+  @override
+  String get facultyOfArts => 'Faculty of Arts';
+
+  @override
+  String get facultyOfEducation => 'Faculty of Education';
+
+  @override
+  String get facultyOfSpecificEducation => 'Faculty of Specific Education';
+
+  @override
+  String get facultyOfPhysicalEducation => 'Faculty of Physical Education';
+
+  @override
+  String get facultyOfLaw => 'Faculty of Law';
+
+  @override
+  String get facultyOfAppliedArts => 'Faculty of Applied Arts';
+
+  @override
+  String get selectCollege => 'Select College';
+
+  @override
+  String get benhaUniversityColleges => 'Benha University Colleges';
+
+  @override
+  String get popularZones => 'Popular Zones';
+
+  @override
+  String get university => 'University';
+
+  @override
+  String get hospital => 'Hospital';
+
+  @override
+  String get busTerminal => 'Bus Terminal';
+
+  @override
+  String get trainStation => 'Train Station';
+
+  @override
+  String get selectGovernorate => 'SELECT GOVERNORATE';
+
+  @override
+  String get selectCityArea => 'SELECT CITY / AREA';
+
+  @override
+  String get whereInBenha => 'WHERE IN BENHA?';
+
+  @override
+  String get chooseDestination => 'Choose destination...';
+
+  @override
+  String get welcome => 'Welcome';
+
+  @override
+  String get planTrip => 'Plan Trip';
+
+  @override
+  String get trainLineCairoGiza => 'Cairo / Giza — Benha Line';
+
+  @override
+  String get trainLineAlexandria => 'Alexandria / Sidi Gaber — Benha Line';
+
+  @override
+  String get trainLineDamietta => 'Damietta / Mansoura — Benha Line';
+
+  @override
+  String get trainLineCentralDelta => 'Central Delta & Menoufia — Benha Line';
+
+  @override
+  String get trainLineCanal => 'Canal & Sharqia — Benha Line';
+
+  @override
+  String get trainLineUpperEgypt => 'Upper Egypt — Benha Line';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get railwayMap => 'Railway Map';
+
+  @override
+  String get allTripsTerminate => 'All trips terminate at Benha Station';
+
+  @override
+  String get findLiveTrips => 'Find Live Trips';
 }

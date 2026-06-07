@@ -56,10 +56,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
-  String? _validatePhone(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Phone number is required';
+  String? _validatePhone(String? v, AppLocalizations l10n) {
+    if (v == null || v.trim().isEmpty) return l10n.phoneRequired;
     final digits = v.replaceAll(RegExp(r'\D'), '');
-    if (digits.length < 10) return 'Enter a valid phone number';
+    if (digits.length < 10) return l10n.invalidPhoneNumber;
     return null;
   }
 
@@ -86,6 +86,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         firstName: _firstName.text.trim(),
         lastName:  _lastName.text.trim(),
         username:  _username.text.trim(),
+        email:     _email.text.trim(),
+        phone:     _phone.text.trim(),
         password:  _password.text.trim(),
       );
 
@@ -95,9 +97,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Account created successfully"),
-        ),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.accountCreatedSuccessfully,
+          ),
+                ),
       );
 
       widget.onSignUpSuccess();
@@ -187,8 +191,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                         // Phone field
                         _LabeledField(
-                          label: 'PHONE NUMBER',
-                          hint: '+20 1XX XXX XXXX',
+                          label: l10n.phoneNumber.toUpperCase(),
+                          hint: l10n.phoneNumberPlaceholder,
                           controller: _phone,
                           keyboardType: TextInputType.phone,
                           inputFormatters: [
@@ -204,7 +208,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               color: AppColors.textMuted,
                             ),
                           ),
-                          validator: _validatePhone,
+                          validator: (v) => _validatePhone(v, l10n),
                         ),
 
                         const SizedBox(height: 16),

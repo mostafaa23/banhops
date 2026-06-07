@@ -200,6 +200,24 @@ abstract class AppLocalizations {
   /// **'Phone number is required'**
   String get phoneRequired;
 
+  /// No description provided for @invalidPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get invalidPhoneNumber;
+
+  /// No description provided for @phoneNumberPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'+20 1XX XXX XXXX'**
+  String get phoneNumberPlaceholder;
+
+  /// No description provided for @accountCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created successfully'**
+  String get accountCreatedSuccessfully;
+
   /// No description provided for @forgotPasswordStep1Desc.
   ///
   /// In en, this message translates to:
@@ -563,13 +581,13 @@ abstract class AppLocalizations {
   /// No description provided for @tapToZoom.
   ///
   /// In en, this message translates to:
-  /// **'Tap to zoom'**
+  /// **'Tap to Zoom'**
   String get tapToZoom;
 
   /// No description provided for @chooseYourRoute.
   ///
   /// In en, this message translates to:
-  /// **'Choose your route'**
+  /// **'Choose Your Route'**
   String get chooseYourRoute;
 
   /// No description provided for @startingFrom.
@@ -673,6 +691,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I can book a taxi for you if you prefer total comfort.'**
   String get aiResponse5;
+
+  /// No description provided for @pleaseSelectDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your destination in Benha first!'**
+  String get pleaseSelectDestination;
+
+  /// No description provided for @couldNotLaunchMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not launch Google Maps'**
+  String get couldNotLaunchMaps;
+
+  /// No description provided for @facultyOfCommerce.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty of Commerce'**
+  String get facultyOfCommerce;
+
+  /// No description provided for @facultyOfArts.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty of Arts'**
+  String get facultyOfArts;
+
+  /// No description provided for @facultyOfEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty of Education'**
+  String get facultyOfEducation;
+
+  /// No description provided for @facultyOfSpecificEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty of Specific Education'**
+  String get facultyOfSpecificEducation;
+
+  /// No description provided for @facultyOfPhysicalEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty of Physical Education'**
+  String get facultyOfPhysicalEducation;
+
+  /// No description provided for @facultyOfLaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty of Law'**
+  String get facultyOfLaw;
+
+  /// No description provided for @facultyOfAppliedArts.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty of Applied Arts'**
+  String get facultyOfAppliedArts;
+
+  /// No description provided for @selectCollege.
+  ///
+  /// In en, this message translates to:
+  /// **'Select College'**
+  String get selectCollege;
+
+  /// No description provided for @benhaUniversityColleges.
+  ///
+  /// In en, this message translates to:
+  /// **'Benha University Colleges'**
+  String get benhaUniversityColleges;
+
+  /// No description provided for @popularZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Zones'**
+  String get popularZones;
+
+  /// No description provided for @university.
+  ///
+  /// In en, this message translates to:
+  /// **'University'**
+  String get university;
+
+  /// No description provided for @hospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital'**
+  String get hospital;
+
+  /// No description provided for @busTerminal.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus Terminal'**
+  String get busTerminal;
+
+  /// No description provided for @trainStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Train Station'**
+  String get trainStation;
+
+  /// No description provided for @selectGovernorate.
+  ///
+  /// In en, this message translates to:
+  /// **'SELECT GOVERNORATE'**
+  String get selectGovernorate;
+
+  /// No description provided for @selectCityArea.
+  ///
+  /// In en, this message translates to:
+  /// **'SELECT CITY / AREA'**
+  String get selectCityArea;
+
+  /// No description provided for @whereInBenha.
+  ///
+  /// In en, this message translates to:
+  /// **'WHERE IN BENHA?'**
+  String get whereInBenha;
+
+  /// No description provided for @chooseDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose destination...'**
+  String get chooseDestination;
+
+  /// No description provided for @welcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get welcome;
+
+  /// No description provided for @planTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Trip'**
+  String get planTrip;
+
+  /// No description provided for @trainLineCairoGiza.
+  ///
+  /// In en, this message translates to:
+  /// **'Cairo / Giza — Benha Line'**
+  String get trainLineCairoGiza;
+
+  /// No description provided for @trainLineAlexandria.
+  ///
+  /// In en, this message translates to:
+  /// **'Alexandria / Sidi Gaber — Benha Line'**
+  String get trainLineAlexandria;
+
+  /// No description provided for @trainLineDamietta.
+  ///
+  /// In en, this message translates to:
+  /// **'Damietta / Mansoura — Benha Line'**
+  String get trainLineDamietta;
+
+  /// No description provided for @trainLineCentralDelta.
+  ///
+  /// In en, this message translates to:
+  /// **'Central Delta & Menoufia — Benha Line'**
+  String get trainLineCentralDelta;
+
+  /// No description provided for @trainLineCanal.
+  ///
+  /// In en, this message translates to:
+  /// **'Canal & Sharqia — Benha Line'**
+  String get trainLineCanal;
+
+  /// No description provided for @trainLineUpperEgypt.
+  ///
+  /// In en, this message translates to:
+  /// **'Upper Egypt — Benha Line'**
+  String get trainLineUpperEgypt;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @railwayMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Railway Map'**
+  String get railwayMap;
+
+  /// No description provided for @allTripsTerminate.
+  ///
+  /// In en, this message translates to:
+  /// **'All trips terminate at Benha Station'**
+  String get allTripsTerminate;
+
+  /// No description provided for @findLiveTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Live Trips'**
+  String get findLiveTrips;
 }
 
 class _AppLocalizationsDelegate

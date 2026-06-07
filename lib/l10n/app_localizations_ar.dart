@@ -60,6 +60,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneRequired => 'رقم الهاتف مطلوب';
 
   @override
+  String get invalidPhoneNumber => 'أدخل رقم هاتف صحيح';
+
+  @override
+  String get phoneNumberPlaceholder => '+20 1XX XXX XXXX';
+
+  @override
+  String get accountCreatedSuccessfully => 'تم إنشاء الحساب بنجاح';
+
+  @override
   String get forgotPasswordStep1Desc =>
       'أدخل رقم هاتفك وبريدك الإلكتروني لتلقي رمز التحقق.';
 
@@ -247,7 +256,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tapToZoom => 'اضغط للتكبير';
 
   @override
-  String get chooseYourRoute => 'اختار خطك';
+  String get chooseYourRoute => 'اختر خطك';
 
   @override
   String startingFrom(Object city) {
@@ -310,4 +319,100 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get aiResponse5 => 'يمكنني حجز تاكسي لك إذا كنت تفضل الراحة التامة.';
+
+  @override
+  String get pleaseSelectDestination => 'برجاء اختيار وجهتك في بنها أولاً!';
+
+  @override
+  String get couldNotLaunchMaps => 'تعذر فتح خرائط جوجل';
+
+  @override
+  String get facultyOfCommerce => 'كلية التجارة';
+
+  @override
+  String get facultyOfArts => 'كلية الآداب';
+
+  @override
+  String get facultyOfEducation => 'كلية التربية';
+
+  @override
+  String get facultyOfSpecificEducation => 'كلية التربية النوعية';
+
+  @override
+  String get facultyOfPhysicalEducation => 'كلية التربية الرياضية';
+
+  @override
+  String get facultyOfLaw => 'كلية الحقوق';
+
+  @override
+  String get facultyOfAppliedArts => 'كلية الفنون التطبيقية';
+
+  @override
+  String get selectCollege => 'اختر الكلية';
+
+  @override
+  String get benhaUniversityColleges => 'كليات جامعة بنها';
+
+  @override
+  String get popularZones => 'المناطق الشائعة';
+
+  @override
+  String get university => 'الجامعة';
+
+  @override
+  String get hospital => 'المستشفى';
+
+  @override
+  String get busTerminal => 'موقف الأتوبيس';
+
+  @override
+  String get trainStation => 'محطة القطار';
+
+  @override
+  String get selectGovernorate => 'اختر المحافظة';
+
+  @override
+  String get selectCityArea => 'اختر المدينة / المنطقة';
+
+  @override
+  String get whereInBenha => 'أين في بنها؟';
+
+  @override
+  String get chooseDestination => 'اختر الوجهة...';
+
+  @override
+  String get welcome => 'مرحباً';
+
+  @override
+  String get planTrip => 'خطط رحلتك';
+
+  @override
+  String get trainLineCairoGiza => 'خط القاهرة / الجيزة — بنها';
+
+  @override
+  String get trainLineAlexandria => 'خط الإسكندرية / سيدي جابر — بنها';
+
+  @override
+  String get trainLineDamietta => 'خط دمياط / المنصورة — بنها';
+
+  @override
+  String get trainLineCentralDelta => 'خط وسط الدلتا والمنوفية — بنها';
+
+  @override
+  String get trainLineCanal => 'خط القناة والشرقية — بنها';
+
+  @override
+  String get trainLineUpperEgypt => 'خط الصعيد — بنها';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get railwayMap => 'خريطة السكة الحديد';
+
+  @override
+  String get allTripsTerminate => 'جميع الرحلات تنتهي في محطة بنها';
+
+  @override
+  String get findLiveTrips => 'ابحث عن رحلات مباشرة';
 }

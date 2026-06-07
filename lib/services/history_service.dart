@@ -3,19 +3,24 @@ import 'package:http/http.dart' as http;
 
 class HistoryService {
 
-  static Future<List<dynamic>> fetchHistory() async {
+  static const String _baseUrl =
+      'https://banhops-backend-production.up.railway.app';
+
+  static Future<List<dynamic>> fetchHistory(String username) async {
 
     final url = Uri.parse(
-      'https://eliminate-lapel-scaling.ngrok-free.dev/api/history/mahmoud_2026',
+      '$_baseUrl/api/history/$username',
     );
 
     final response = await http.get(
       url,
       headers: {
-        "ngrok-skip-browser-warning": "true",
         "Content-Type": "application/json",
       },
     );
+
+    print("HISTORY STATUS: ${response.statusCode}");
+    print("HISTORY RESPONSE: ${response.body}");
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
+import '../services/login_service.dart';
+import '../services/user_session.dart';
 
 class SignInScreen extends StatefulWidget {
   final VoidCallback onSignInSuccess;
@@ -63,9 +65,31 @@ class _SignInScreenState extends State<SignInScreen>
     return null;
   }
 
-  void _handleSignIn() {
-    if (_formKey.currentState?.validate() ?? false) {
+  void _handleSignIn() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    try {
+      final result = await LoginService.login(
+        username: _usernameCtrl.text.trim(),
+        password: _passwordCtrl.text.trim(),
+      );
+
+      print("LOGIN SUCCESS: $result");
+
+      // ✅ احفظ الـ session
+      await UserSession.save(
+        username: result['username'],
+        firstName: result['firstName'],
+      );
+
+      if (!mounted) return;
       widget.onSignInSuccess();
+
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     }
   }
 

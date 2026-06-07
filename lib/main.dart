@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 import 'screens/loading_screen.dart';
@@ -11,9 +10,11 @@ import 'screens/home_screen.dart';
 import 'screens/train_lines_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/chat_screen.dart';
+import 'screens/smart_chat_screen.dart';
 import 'screens/route_details_screen.dart';
 import 'screens/language_settings_screen.dart';
+import 'services/trip_history_service.dart';
+import 'services/user_session.dart';
 import 'widgets/bottom_nav_bar.dart';
 
 void main() {
@@ -138,13 +139,49 @@ class _MainShell extends StatefulWidget {
 class _MainShellState extends State<_MainShell> {
   NavTab _tab = NavTab.home;
   final List<TripHistoryItem> _tripHistory = [];
+  String _currentUsername = 'guest';
 
-  // ✅ Chat context — بيتحدث لما المستخدم يجي من RouteDetailsScreen
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final username = await UserSession.getUsername();
+    setState(() => _currentUsername = username);
+    await _loadTripsFromApi(username);
+  }
+
+  Future<void> _loadTripsFromApi(String username) async {
+    try {
+      final trips = await TripHistoryService.getHistory(username);
+      setState(() {
+        _tripHistory.clear();
+        for (final t in trips) {
+          _tripHistory.add(TripHistoryItem(
+            from: t['fromLocation'] ?? '',
+            to: t['toLocation'] ?? '',
+            line: t['lineName'] ?? '',
+            date: DateTime.parse(t['date']),
+          ));
+        }
+      });
+    } catch (e) {
+      print('Error loading trips: $e');
+    }
+  }
+
+  // ✅ 1. تحديث متغيرات الـ State لاستيعاب بيانات تفاصيل الرحلة الجديدة بدلاً من _chatRouteType
   String? _chatFrom;
   String? _chatTo;
-  String? _chatRouteType;
+  String? _chatTransportMode;
+  String? _chatCostMin;
+  String? _chatCostMax;
+  String? _chatTimeMin;
+  String? _chatTimeMax;
 
-  void _addTrip(String from, String to, String line) {
+  void _addTrip(String from, String to, String line) async {
     setState(() {
       _tripHistory.insert(
         0,
@@ -156,6 +193,13 @@ class _MainShellState extends State<_MainShell> {
         ),
       );
     });
+
+    TripHistoryService.addTrip(
+      username: _currentUsername,
+      fromLocation: from,
+      toLocation: to,
+      lineName: line,
+    );
   }
 
   @override
@@ -173,13 +217,25 @@ class _MainShellState extends State<_MainShell> {
                     from: from,
                     to: to,
                     onBack: () => Navigator.of(ctx).pop(),
-                    // ✅ بيستقبل routeType من الكارت المختار
-                    onOpenChat: (chatFrom, chatTo, routeType) {
+                    // ✅ 2. تحديث الـ Callback ليستقبل الـ Named Parameters الممررة من RouteDetailsScreen وتخزينها
+                    onOpenChat: ({
+                      required String from,
+                      required String to,
+                      String? transportMode,
+                      String? costMin,
+                      String? costMax,
+                      String? timeMin,
+                      String? timeMax,
+                    }) {
                       Navigator.of(ctx).pop();
                       setState(() {
-                        _chatFrom = chatFrom;
-                        _chatTo = chatTo;
-                        _chatRouteType = routeType;
+                        _chatFrom = from;
+                        _chatTo = to;
+                        _chatTransportMode = transportMode;
+                        _chatCostMin = costMin;
+                        _chatCostMax = costMax;
+                        _chatTimeMin = timeMin;
+                        _chatTimeMax = timeMax;
                         _tab = NavTab.chat;
                       });
                     },
@@ -196,19 +252,16 @@ class _MainShellState extends State<_MainShell> {
         );
 
       case NavTab.chat:
-        return ChatScreen(
-          onNavigate: (t) {
-            // ✅ لما يسافر من الشات لأي تاب تاني، نمسح الـ context
-            setState(() {
-              _chatFrom = null;
-              _chatTo = null;
-              _chatRouteType = null;
-              _tab = t;
-            });
-          },
+      // ✅ 3. تحديث استدعاء SmartChatScreen وتمرير كافة المتغيرات الجديدة بنجاح
+        return SmartChatScreen(
+          onNavigate: (t) => setState(() => _tab = t),
           from: _chatFrom,
           to: _chatTo,
-          routeType: _chatRouteType,
+          transportMode: _chatTransportMode,
+          costMin: _chatCostMin,
+          costMax: _chatCostMax,
+          timeMin: _chatTimeMin,
+          timeMax: _chatTimeMax,
         );
 
       case NavTab.history:

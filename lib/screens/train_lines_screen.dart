@@ -29,75 +29,98 @@ class TrainLinesScreen extends StatefulWidget {
 }
 
 class _TrainLinesScreenState extends State<TrainLinesScreen> {
-  static const _lines = <TrainLine>[
+  // ✅ All 20 JSON lines structured and merged into 6 main core tracks
+  List<TrainLine> _getLines(AppLocalizations l10n) => [
     TrainLine(
-      id: 'line1',
-      name: 'Line 1 — Cairo / Benha',
-      color: Color(0xFF4A90E2),
+      id: 'TRAIN_CAIRO_GIZA_BENHA',
+      name: l10n.trainLineCairoGiza,
+      color: const Color(0xFF4A90E2), // Tito's Signature Blue
       icon: '🏙️',
-      stations: ['Cairo', 'Qalyub', 'Banha'],
+      stations: const ['Giza', 'Cairo', 'Shobra El-Kheima', 'Qalyoub', 'Qaha', 'Benha'],
     ),
     TrainLine(
-      id: 'line2',
-      name: 'Line 2 — Tanta / Benha',
-      color: Color(0xFFE53935),
-      icon: '🚜',
-      stations: ['Tanta', 'Shebin', 'Banha'],
-    ),
-    TrainLine(
-      id: 'line3',
-      name: 'Line 3 — Mansoura / Benha',
-      color: Color(0xFF43A047),
-      icon: '🌾',
-      stations: ['Mansoura', 'Zagazig', 'Banha'],
-    ),
-    TrainLine(
-      id: 'line4',
-      name: 'Line 4 — Minya / Benha',
-      color: Color(0xFFFB8C00),
-      icon: '⛰️',
-      stations: ['Minya', 'Beni Suef', 'Cairo', 'Banha'],
-    ),
-    TrainLine(
-      id: 'line5',
-      name: 'Line 5 — Alexandria / Benha',
-      color: Color(0xFF8E24AA),
+      id: 'TRAIN_ALEX_SIDI_BENHA',
+      name: l10n.trainLineAlexandria,
+      color: const Color(0xFF8E24AA),
       icon: '🌊',
-      stations: ['Alexandria', 'Damanhur', 'Tanta', 'Banha'],
+      stations: const ['Alexandria', 'Sidi Gaber', 'Kafr El-Dawar', 'Damanhour', 'Itay El-Baroud', 'Kafr El-Zayat', 'Tanta', 'Birket El-Sab', 'Quesna', 'Toukh', 'Benha'],
+    ),
+    TrainLine(
+      id: 'TRAIN_MANSOURA_DOMIAT_BENHA',
+      name: l10n.trainLineDamietta,
+      color: const Color(0xFF43A047),
+      icon: '🌾',
+      stations: const ['Damietta', 'Kafr Saad', 'Sherbin', 'Talkha', 'Mansoura', 'Samannoud', 'Mahallat Rouh', 'Tanta', 'Birket El-Sab', 'Quesna', 'Toukh', 'Benha'],
+    ),
+    TrainLine(
+      id: 'TRAIN_MENOUF_TANTA_BENHA',
+      name: l10n.trainLineCentralDelta,
+      color: const Color(0xFF00ACC1),
+      icon: '🌳',
+      stations: const ['Menouf', 'Sers El-Lyan', 'Kafr Shobra Zangi', 'Jarwan', 'El-Bagour', 'Sobk El-Dahak', 'Mit El-Wasta', 'Estanha', 'Tanta', 'Birket El-Sab', 'Quesna', 'Toukh', 'Kafr Bata', 'Benha'],
+    ),
+    TrainLine(
+      id: 'TRAIN_EAST_CANAL_BENHA',
+      name: l10n.trainLineCanal,
+      color: const Color(0xFFFB8C00),
+      icon: '🚢',
+      stations: const [
+        'Suez', 'Ismailia', 'Moaskar El-Jalaa', 'Nafisha', 'El-Wasfeya', 'Abu Suweir', 'Abu Jreish',
+        'Mohamed Baghdadi', 'El-Mahsama', 'El-Qassassin', 'El-Baalwa', 'El-Tell El-Kebir', 'Mahjar Abu Hammad',
+        'Abu Hammad', 'El-Sowa', 'Safat El-Henna', 'El-Shabanat', 'Zagazig', 'El-Zankaloun', 'El-Qaraqra',
+        'El-Jadida', 'Minya El-Qamh', 'Mit Yazid', 'Koum Hallin', 'El-Azizia', 'Sheblanga', 'Minyet El-Seba', 'Kafr El-Gazzar', 'Benha'
+      ],
+    ),
+    TrainLine(
+      id: 'TRAIN_UPPER_EGYPT_BENHA',
+      name: l10n.trainLineUpperEgypt,
+      color: const Color(0xFFE53935),
+      icon: '⛰️',
+      stations: const ['Aswan', 'Luxor', 'Qena', 'Sohag', 'Assiut', 'Minya', 'Beni Suef', 'El-Wasta', 'El-Ayyat', 'Giza', 'Cairo', 'Benha'],
     ),
   ];
 
+  // ✅ Mapping the 20 customizable start cities to their respective Seeder route_ids
   static const _cities = [
-    {'name': 'Assiut - Benha',       'line': 'line1'},
-    {'name': 'Alexandria - Benha',   'line': 'line5'},
-    {'name': 'Ismailia - Benha',     'line': 'line1'},
-    {'name': 'Luxor - Benha',        'line': 'line4'},
-    {'name': 'Beheira - Benha',      'line': 'line5'},
-    {'name': 'Zagazig - Benha',      'line': 'line3'},
-    {'name': 'Suez - Benha',         'line': 'line1'},
-    {'name': 'Fayoum - Benha',       'line': 'line4'},
-    {'name': 'Cairo - Benha',        'line': 'line1'},
-    {'name': 'Mansoura - Benha',     'line': 'line3'},
-    {'name': 'Minya - Benha',        'line': 'line4'},
-    {'name': 'Sohag - Benha',        'line': 'line4'},
-    {'name': 'Tanta - Benha',        'line': 'line2'},
-    {'name': 'Damietta - Benha',     'line': 'line3'},
-    {'name': 'Matrouh - Benha',      'line': 'line5'},
+    {'name': 'Cairo - Benha',       'line': 'TRAIN_CAIRO_GIZA_BENHA', 'route_id': 'TRAIN_CAIRO_BENHA'},
+    {'name': 'Giza - Benha',        'line': 'TRAIN_CAIRO_GIZA_BENHA', 'route_id': 'TRAIN_GIZA_BENHA'},
+    {'name': 'Alexandria - Benha',   'line': 'TRAIN_ALEX_SIDI_BENHA',  'route_id': 'TRAIN_ALEX_BENHA'},
+    {'name': 'Sidi Gaber - Benha',    'line': 'TRAIN_ALEX_SIDI_BENHA',  'route_id': 'TRAIN_SIDIGABER_BENHA'},
+    {'name': 'Damanhour - Benha',      'line': 'TRAIN_ALEX_SIDI_BENHA',  'route_id': 'TRAIN_DAMANHOUR_BENHA'},
+    {'name': 'Damietta - Benha',       'line': 'TRAIN_MANSOURA_DOMIAT_BENHA', 'route_id': 'TRAIN_DOMIAT_BENHA'},
+    {'name': 'Mansoura - Benha',     'line': 'TRAIN_MANSOURA_DOMIAT_BENHA', 'route_id': 'TRAIN_MANSOURA_BENHA'},
+    {'name': 'Tanta - Benha',        'line': 'TRAIN_MENOUF_TANTA_BENHA', 'route_id': 'TRAIN_TANTA_BENHA'},
+    {'name': 'Menouf - Benha',        'line': 'TRAIN_MENOUF_TANTA_BENHA', 'route_id': 'TRAIN_MENOUF_BENHA'},
+    {'name': 'Zagazig - Benha',     'line': 'TRAIN_EAST_CANAL_BENHA', 'route_id': 'TRAIN_ZAGAZIG_BENHA'},
+    {'name': 'Ismailia - Benha',   'line': 'TRAIN_EAST_CANAL_BENHA', 'route_id': 'TRAIN_ISMAILIA_BENHA'},
+    {'name': 'Suez - Benha',       'line': 'TRAIN_EAST_CANAL_BENHA', 'route_id': 'TRAIN_SUEZ_BENHA'},
+    {'name': 'Beni Suef - Benha',     'line': 'TRAIN_UPPER_EGYPT_BENHA', 'route_id': 'TRAIN_BENISUEF_BENHA'},
+    {'name': 'Minya - Benha',        'line': 'TRAIN_UPPER_EGYPT_BENHA', 'route_id': 'TRAIN_MINYA_BENHA'},
+    {'name': 'Assiut - Benha',       'line': 'TRAIN_UPPER_EGYPT_BENHA', 'route_id': 'TRAIN_ASSIUT_BENHA'},
+    {'name': 'Sohag - Benha',       'line': 'TRAIN_UPPER_EGYPT_BENHA', 'route_id': 'TRAIN_SOHAG_BENHA'},
+    {'name': 'Qena - Benha',         'line': 'TRAIN_UPPER_EGYPT_BENHA', 'route_id': 'TRAIN_QENA_BENHA'},
+    {'name': 'Luxor - Benha',       'line': 'TRAIN_UPPER_EGYPT_BENHA', 'route_id': 'TRAIN_LUXOR_BENHA'},
+    {'name': 'Aswan - Benha',       'line': 'TRAIN_UPPER_EGYPT_BENHA', 'route_id': 'TRAIN_ASWAN_BENHA'},
   ];
 
   TrainLine? _selectedLine;
+  String? _filterRouteId;
+  late List<TrainLine> _lines;
 
   TrainLine _findLine(String id) => _lines.firstWhere((l) => l.id == id);
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    _lines = _getLines(l10n);
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: Stack(
         children: [
           Column(
             children: [
-              _buildHeader(),
+              _buildHeader(l10n),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
@@ -106,7 +129,7 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                     switchInCurve: Curves.easeOut,
                     child: _selectedLine == null
                         ? _buildPicker()
-                        : _buildDetails(_selectedLine!),
+                        : _buildDetails(_selectedLine!, _filterRouteId!),
                   ),
                 ),
               ),
@@ -127,8 +150,7 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
   }
 
   // ── Header ──────────────────────────────────────────────────
-  Widget _buildHeader() {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildHeader(AppLocalizations l10n) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(24, 56, 24, 24),
@@ -143,6 +165,7 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
+                    fontFamily: 'Cairo',
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -153,6 +176,7 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                     fontSize: 14,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Cairo',
                   ),
                 ),
               ],
@@ -160,12 +184,12 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
           ),
           if (_selectedLine != null)
             GestureDetector(
-              onTap: () => setState(() => _selectedLine = null),
+              onTap: () => setState(() {
+                _selectedLine = null;
+                _filterRouteId = null;
+              }),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(20),
@@ -180,6 +204,7 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                         color: AppColors.primary,
                         fontWeight: FontWeight.w900,
                         fontSize: 13,
+                        fontFamily: 'Cairo',
                       ),
                     ),
                   ],
@@ -193,7 +218,6 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
 
   // ── Picker View ─────────────────────────────────────────────
   Widget _buildPicker() {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       key: const ValueKey('picker'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +231,7 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
             border: Border.all(color: const Color(0xFFF3F4F6)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -218,12 +242,13 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Text(
-                      l10n.trainMap,
-                      style: const TextStyle(
+                      'Railway Map',
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
+                        fontFamily: 'Cairo',
                         color: AppColors.textPrimary,
                       ),
                     ),
@@ -231,25 +256,22 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                   GestureDetector(
                     onTap: _showFullMap,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
-                          const Icon(Icons.zoom_in,
-                              size: 16, color: AppColors.primary),
-                          const SizedBox(width: 4),
+                          Icon(Icons.zoom_in, size: 16, color: AppColors.primary),
+                          SizedBox(width: 4),
                           Text(
-                            l10n.tapToZoom,
-                            style: const TextStyle(
+                            'Tap to Zoom',
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
+                              fontFamily: 'Cairo',
                             ),
                           ),
                         ],
@@ -278,25 +300,26 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
 
         const SizedBox(height: 28),
 
-        // ── City Chips Grid ──────────────────────────────────
-        Text(
-          l10n.chooseYourRoute,
-          style: const TextStyle(
+        const Text(
+          'Choose Your Route',
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w900,
+            fontFamily: 'Cairo',
             color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 16),
 
         ..._cities.map(
-          (city) => Padding(
+              (city) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _RouteCard(
               name: city['name']!,
-              onTap: () => setState(
-                () => _selectedLine = _findLine(city['line']!),
-              ),
+              onTap: () => setState(() {
+                _selectedLine = _findLine(city['line']!);
+                _filterRouteId = city['route_id'];
+              }),
             ),
           ),
         ),
@@ -305,16 +328,20 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
   }
 
   // ── Details View ─────────────────────────────────────────────
-  Widget _buildDetails(TrainLine line) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildDetails(TrainLine line, String routeId) {
+    // Dynamic filter logic cutting off prior stations depending on chosen JSON route
+    final startStationName = _cities.firstWhere((c) => c['route_id'] == routeId)['name']!.split(' - ').first.trim();
+    final startIndex = line.stations.indexOf(startStationName);
+    final filteredStations = startIndex != -1 ? line.stations.sublist(startIndex) : line.stations;
+
     return Container(
-      key: ValueKey(line.id),
+      key: ValueKey(routeId),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(40),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 40,
             offset: const Offset(0, 16),
           ),
@@ -324,15 +351,12 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Colored Header ───────────────────────────────
+          // Station Line Gradient/Colored Block
           Container(
             padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: line.color,
-            ),
+            decoration: BoxDecoration(color: line.color),
             child: Stack(
               children: [
-                // Glow circle decoration
                 Positioned(
                   right: -40,
                   top: -40,
@@ -341,14 +365,13 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                     height: 160,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.10),
+                      color: Colors.white.withOpacity(0.10),
                     ),
                   ),
                 ),
                 Row(
                   children: [
-                    Text(line.icon,
-                        style: const TextStyle(fontSize: 48)),
+                    Text(line.icon, style: const TextStyle(fontSize: 48)),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -359,16 +382,18 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
+                              fontFamily: 'Cairo',
                               color: Colors.white,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            l10n.allTripsEndAtBenha,
+                            'All trips terminate at Benha Station',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: Colors.white.withOpacity(0.85),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
+                              fontFamily: 'Cairo',
                             ),
                           ),
                         ],
@@ -380,31 +405,29 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
             ),
           ),
 
-          // Destination badge
+          // Benha Destination Badge
           Padding(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Align(
-              alignment: Alignment.centerRight,
+              alignment: Alignment.centerLeft,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.location_on,
-                        size: 16, color: AppColors.primary),
-                    const SizedBox(width: 6),
+                    Icon(Icons.location_on, size: 16, color: AppColors.primary),
+                    SizedBox(width: 6),
                     Text(
-                      l10n.destinationBenha,
-                      style: const TextStyle(
+                      'Destination: Benha',
+                      style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w900,
                         fontSize: 13,
+                        fontFamily: 'Cairo',
                       ),
                     ),
                   ],
@@ -413,25 +436,24 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
             ),
           ),
 
-          // ── Stations ─────────────────────────────────────
+          // Stations Stepper Pipeline
           Padding(
-            padding:
-            const EdgeInsets.fromLTRB(24, 0, 24, 32),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
             child: Column(
               children: [
-                ...List.generate(line.stations.length, (i) {
-                  final isLast = i == line.stations.length - 1;
+                ...List.generate(filteredStations.length, (i) {
+                  final isLast = i == filteredStations.length - 1;
                   return _StationRow(
-                    station: line.stations[i],
+                    station: filteredStations[i],
                     index: i,
                     isLast: isLast,
-                    showConnector: i < line.stations.length - 1,
+                    showConnector: i < filteredStations.length - 1,
                     color: line.color,
                   );
                 }),
                 const SizedBox(height: 28),
 
-                // ── Book Button ───────────────────────────
+                // Navigation trigger button
                 SizedBox(
                   width: double.infinity,
                   height: 64,
@@ -446,18 +468,19 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                       elevation: 8,
                       shadowColor: Colors.black38,
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          l10n.getRoutes,
-                          style: const TextStyle(
+                          'Find Live Trips',
+                          style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w900,
+                            fontFamily: 'Cairo',
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        const Icon(Icons.arrow_forward, size: 20),
+                        SizedBox(width: 12),
+                        Icon(Icons.arrow_forward, size: 20),
                       ],
                     ),
                   ),
@@ -474,7 +497,7 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
   void _showFullMap() {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.95),
+      barrierColor: Colors.black.withOpacity(0.95),
       builder: (_) => Stack(
         children: [
           Center(
@@ -483,19 +506,9 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
               maxScale: 8,
               child: Container(
                 margin: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.4),
-                      Colors.purple.withValues(alpha: 0.3),
-                    ],
-                  ),
-                ),
                 width: 600,
                 height: 400,
                 alignment: Alignment.center,
-                // ✅ Replace with Image.asset when train map image is ready
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
@@ -515,14 +528,10 @@ class _TrainLinesScreenState extends State<TrainLinesScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
+                  color: Colors.white.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 28),
               ),
             ),
           ),
@@ -548,8 +557,6 @@ class _RouteCardState extends State<_RouteCard> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    // ── استخرج المدينة الأولى من "X - بنها"
     final city = widget.name.split(' - ').first.trim();
 
     return GestureDetector(
@@ -571,7 +578,7 @@ class _RouteCardState extends State<_RouteCard> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -579,15 +586,12 @@ class _RouteCardState extends State<_RouteCard> {
         ),
         child: Row(
           children: [
-            // Icon
             AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: _pressed
-                    ? AppColors.primary
-                    : const Color(0xFFEFF6FF),
+                color: _pressed ? AppColors.primary : const Color(0xFFEFF6FF),
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.center,
@@ -597,10 +601,7 @@ class _RouteCardState extends State<_RouteCard> {
                 size: 22,
               ),
             ),
-
             const SizedBox(width: 16),
-
-            // Route text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,30 +611,28 @@ class _RouteCardState extends State<_RouteCard> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
+                      fontFamily: 'Cairo',
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    l10n.startingFrom(city),
+                    'Starting from $city',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w500,
+                      fontFamily: 'Cairo',
                     ),
                   ),
                 ],
               ),
             ),
-
-            // Arrow
             Container(
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: _pressed
-                    ? AppColors.primary.withValues(alpha: 0.15)
-                    : const Color(0xFFF8FAFC),
+                color: _pressed ? AppColors.primary.withOpacity(0.15) : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -667,12 +666,10 @@ class _StationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Left track column ──────────────────────────
           Column(
             children: [
               AnimatedContainer(
@@ -682,13 +679,10 @@ class _StationRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isLast ? Colors.green : Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  border: isLast
-                      ? Border.all(
-                      color: Colors.green.shade100, width: 6)
-                      : null,
+                  border: isLast ? Border.all(color: Colors.green.shade100, width: 6) : null,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: Colors.black.withOpacity(0.08),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -696,8 +690,7 @@ class _StationRow extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: isLast
-                    ? const Icon(Icons.location_on,
-                    color: Colors.white, size: 26)
+                    ? const Icon(Icons.location_on, color: Colors.white, size: 26)
                     : Container(
                   width: 18,
                   height: 18,
@@ -716,10 +709,7 @@ class _StationRow extends StatelessWidget {
                 ),
             ],
           ),
-
           const SizedBox(width: 20),
-
-          // ── Station info ────────────────────────────────
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -734,20 +724,18 @@ class _StationRow extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w900,
-                            color: isLast
-                                ? Colors.green
-                                : AppColors.textPrimary,
+                            fontFamily: 'Cairo',
+                            color: isLast ? Colors.green : AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          isLast
-                              ? l10n.finalArrival
-                              : l10n.stationNumber(index + 1),
+                          isLast ? 'FINAL ARRIVAL' : 'STATION ${index + 1}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textMuted,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'Cairo',
                             letterSpacing: 1.6,
                           ),
                         ),
@@ -756,19 +744,18 @@ class _StationRow extends StatelessWidget {
                   ),
                   if (isLast)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.green.shade50,
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Text(
-                        l10n.liveBadge,
-                        style: const TextStyle(
+                      child: const Text(
+                        'LIVE',
+                        style: TextStyle(
                           color: Colors.green,
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
-                          letterSpacing: 1,
+                          fontFamily: 'Cairo',
                         ),
                       ),
                     ),
